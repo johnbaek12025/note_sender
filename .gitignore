@@ -1,0 +1,7 @@
+.idea/
+__pycache__/
+log/
+*.sqlite3
+migrations/
+*.exe
+*.dll

@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+  <title>LJ Note Sender</title>
+  <meta content="" name="description">
+  <meta content="" name="keywords">
+
+  <!-- Favicons -->
+  <link href="{% static 'assets/img/favicon.png' %}" rel="icon">
+  <link href="{% static 'assets/img/apple-touch-icon.png' %}" rel="apple-touch-icon">
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.gstatic.com" rel="preconnect">
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
+
+  <!-- Vendor CSS Files -->
+  <link href="{% static 'assets/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/vendor/bootstrap-icons/bootstrap-icons.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/vendor/boxicons/css/boxicons.min.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/vendor/quill/quill.snow.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/vendor/quill/quill.bubble.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/vendor/remixicon/remixicon.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/vendor/simple-datatables/style.css' %}" rel="stylesheet">
+
+  <!-- Template Main CSS File -->
+  <link href="{% static 'assets/css/style.css' %}" rel="stylesheet">
+  
+
+  <!-- =======================================================
+  * Template Name: NiceAdmin - v2.2.2
+  * Template URL: https://bootstrapmade.com/nice-admin-bootstrap-admin-html-template/
+  * Author: BootstrapMade.com
+  * License: https://bootstrapmade.com/license/
+  ======================================================== -->
+</head>
+
+<body>
+
+  <!-- ======= Header ======= -->
+  <header id="header" class="header fixed-top d-flex align-items-center">
+
+    <div class="d-flex align-items-center justify-content-between">
+      <a href="index.html" class="logo d-flex align-items-center">
+        <img src="{% static 'assets/img/logo.png' %}" alt="">
+        <span class="d-none d-lg-block">LJ Note Sender</span>
+      </a>
+
+    </div><!-- End Logo -->
+
+
+
+  </header><!-- End Header -->
+
+  <!-- ======= Sidebar ======= -->
+
+<main id="main" class="main m-0">
+
+  <div>
+    <span></span>
+  </div>
+  <section class="section mt-lg-5 mt-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card">
+        <div class="card-body m-0">
+          <h5 class="card-title">네이버 쪽지 발송</h5>
+          <div class="tab-content pt-2" id="borderedTabJustifiedContent">
+            <div class="tab-pane fade show active" id="bordered-justified-home" role="tabpanel" aria-labelledby="home-tab">                               
+              <!-- General Form Elements -->
+              <form>
+                <!--발신자 row-->
+                <div role="group" class="row">
+                  <div class="form-group col-6">
+                    <label for="categorization"><h3>발송 계정 할당</h3></label>
+                    <div>
+                      <label class="ml-3 mr-3">
+                        <small>*아이디 비밀번호를 입력 하고, 입력 버튼 누르거나 </small>
+                      </br>
+                        <small>*파일을 선택하고, 입력 버튼을 누르면 됩니다. 둘 다 채울시 파일만 읽습니다.</small>
+                      </label>
+                    </div>                    
+                    <div role="group" class="row">
+                      <div class="form-group col-3">
+                          <input type="text" class="form-control" id="acc_nid" name="acc_nid"
+                                 placeholder="아이디">
+                      </div><!--form-group col-3-->
+                      <div class="form-group col-3">                          
+                          <input type="text" class="form-control" id="acc_npw" name="acc_npw"
+                              placeholder="비밀번호">
+                      </div><!--form-group col-3-->    
+                      <div class="form-group col-2">
+                      <form id="excelForm" role="form" action="" method="post">
+                        {% csrf_token %}
+                        <label for="account_file", style=" padding: 6px 10px; background-color:#0D6EFD;border-radius: 4px;
+                        color: white;
+                        cursor: pointer;">
+                          파일
+                        </label>
+                        <input type="file" id="account_file" accept=".xlsx, .xls, .csv" style="display: none"/>
+                      </form>
+                      </div><!--form-group col-3-->                   
+                      <div class="form-group col-2">
+                        <button type="button" id="accoount_insert" class="btn btn-primary">입력</button>                        
+                      </div><!--form-group col-3-->                             
+                      </br></br>
+                      <div class="form-group col-12">
+                        <select id="assignedAccount" name="assignedAccount" class="select" multiple="multiple" data-placeholder=""
+                                style="width: 100%;">
+                          {% for id, nid, npw in account %}
+                          <option value="{{ id }}">{{ nid }} / {{npw}}
+                          </option>
+                          {% endfor %}
+                        </select>
+                      </div><!--form-group col-8-->                      
+                      <div class="form-group col-8">                        
+                        <select class="form-control" id="tethering" name="tethering">
+                            <option value="true">테더링 O</option>
+                            <option value="false">테더링 X</option>
+                        </select>                        
+                      </div>
+                      <div class="form-group col-4">
+                        <button type="submit" id="accoount_cetainty" class="btn btn-primary">아이디 검증</button>
+                      </div><!--form-group col-3--> 
+                    </div><!--row-->                    
+                  </div><!--form-group col-5-->
+                  <div class="form-group col-6">
+                    <div>
+                    <label for="categorization"><h4>수신자</h4></label>
+                    </div>
+                    <div>
+                      <label class="ml-3 mr-3">
+                        <small>*수신자를 입력 하실 경우 블로거 아이디를 입력하시고, 입력 버튼을 누르시고 </small>
+                      </br>
+                        <small>*키워드에 대한 블로거를 수집 하실 경우 키워드를 입력 후 수집 버튼을 누르시면 됩니다.</small>
+                      </label>
+                    </div>                    
+                    <div class="form-group col-9">
+                      <div role="group" class="row">
+                        <div class="form-group col-3">
+                          <input type="text" class="form-control" id="nid" name="nid"
+                                  placeholder="수신자">                          
+                        </div><!--form-group col-3-->
+                        <div class="form-group col-3">
+                          <button type="submit" id="receiver_nid" class="btn btn-primary">입력</button>
+                        </div><!--form-group col-3-->
+                        <div class="form-group col-3">                          
+                          <input type="text" class="form-control" id="keyword" name="keyword"
+                              placeholder="키워드">                          
+                        </div><!--form-group col-3-->
+                        <div class="form-group col-3">
+                          <button type="submit" id="collect" class="btn btn-primary">수집</button>
+                        </div><!--form-group col-3-->                        
+                        </br></br>
+                        <div class="form-group col-12">
+                          <select id="assignedReceiver" name="assignedReceiver" class="select" multiple="multiple" data-placeholder=""
+                                style="width: 100%;">
+                            {% for id, nid, keyword, blog_name in receiver %}
+                            <option value="{{ id }}">{{ nid }} / {{ keyword }} / {{ blog_name }}</option>
+                            {% endfor %}
+                          </select>
+                        </div><!--form-group col-12-->
+                      </div><!--"row"-->
+                    </div><!--form-group col-12-->                    
+                  </div><!--form-group col-7-->
+                </div><!--row account-->
+                </br>
+                </br>                      
+                
+                <!--메세지 row-->
+                <div role="group" class="row">
+                  <div class="form-group col-10">
+                    <label for="categorization"><h4>메세지</h4></label>
+                    <select id="assignedMessage" name="assignedMessage" class="select" multiple="multiple" data-placeholder=""
+                            style="width: 100%;">
+                        {% for id, msg in message %}
+                        <option value="{{ id }}">{{ msg }}</option>
+                        {% endfor %}
+                    </select>                    
+                  </div><!--form-group col-10-->
+                  <div class="form-group col-10">
+                    </br>                
+                    <textarea name="msg" rows="3" cols="50" placeholder="메세지를 추가하실 경우 작성해주세요"></textarea>
+                  </div><!--form-group col-10-->
+                  <div class="form-group col-3">
+                    <button type="submit" id="msg_add" class="btn btn-primary">추가</button>
+                  </div><!--form-group col-3-->
+                </div><!--row msg-->
+                </br>            
+                </br>
+                <!--명언 row-->
+                <div role="group" class="row">
+                  <div class="form-group col-10">
+                    <label for="categorization"><h4>명언</h4></label>
+                    <select id="assignedQuote" name="assignedQuote" class="select" multiple="multiple" data-placeholder=""
+                            style="width: 100%;">
+                        {% for id, msg in quote %}
+                        <option value="{{ id }}">{{ msg }}</option>
+                        {% endfor %}
+                    </select>                    
+                  </div><!--form-group col-10-->
+                  <div class="form-group col-10">
+                    </br>
+                    <textarea name="quote" rows="3" cols="50" placeholder="명언을 추가 하실 경우 작성해주세요"></textarea>
+                  </div><!--form-group col-10-->
+                  <div class="form-group col-3">
+                    <button type="submit" id="quote_add" class="btn btn-primary">추가</button>
+                  </div><!--form-group col-3-->          
+                </div> <!--row quote-->
+                </br>
+                </br>
+                <!--로그 row-->
+                <div role="group" class="row">
+                  <div>
+                    <label for="categorization"><h4>결과 메세지</h4></label>
+                    <select multiple="multiple" data-placeholder="" style="width: 100%;">
+                        {% for id, nid, result, receiver, ip in log %}
+                        <option>{{ nid }}의 {{ip}}을 통한 {{receiver}} 발송 결과: {{result}}</option>
+                        {% endfor %}
+                    </select>
+                  </div>
+                  <div class="col-lg-1">
+                    <label class="col-sm-2 col-form-label"></label>                                  
+                    <div class="row mb-4">
+                      <button type="button" id="submit" class="btn btn-primary">보내기</button>
+                    </div><!--row mb-3-->
+                  </div><!--form-group col-lg-1-->
+                  <div class="col-lg-10">
+                  </div><!--form-group col-lg-1-->
+                  <div class="col-lg-1">
+                    <label class="col-sm-2 col-form-label"></label>                                  
+                    <div class="row mb-3">
+                      <button type="submit" id="delete" class="btn btn-primary">지우기</button>
+                    </div><!--row mb-3-->
+                  </div><!--form-group col-lg-1-->                  
+                </div><!--row log-->                            
+              </form><!-- End General Form Elements -->              
+            </div><!--tab-pane fade show active-->
+          </div><!-- End tab-content pt-2 -->         
+        </div><!--card-body m-0-->
+      </div><!--card-->
+    </div><!--col-lg-8-->
+  </div><!--row justify-content-center-->
+  </section>
+
+</main><!-- End #main -->
+
+  <!-- ======= Footer ======= -->
+
+
+<a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+  <!-- Vendor JS Files -->
+  <script src="{%static 'assets/vendor/apexcharts/apexcharts.min.js' %}"></script>
+  <script src="{%static 'assets/vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+  <script src="{%static 'assets/vendor/chart.js/chart.min.js' %}"></script>
+  <script src="{%static 'assets/vendor/echarts/echarts.min.js' %}"></script>
+  <script src="{%static 'assets/vendor/quill/quill.min.js' %}"></script>
+  <script src="{%static 'assets/vendor/simple-datatables/simple-datatables.js' %}"></script>
+  <script src="{%static 'assets/vendor/tinymce/tinymce.min.js' %}"></script>
+  <script src="{%static 'assets/vendor/php-email-form/validate.js' %}"></script>
+
+  <!-- Template Main JS File -->
+  <script src="{%static 'assets/js/main.js' %}"></script>
+  <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+  <script>    
+    $('#submit').on('click', function (e) {
+      const accs = $('#assignedAccount').val();
+      const receivers = $('#assignedReceiver').val();
+      const msg = $('#assignedMessage').val();
+      const quote = $('#assignedQuote').val();
+      const tethering = $('#tethering').val();
+      const data = {accs: accs, receivers: receivers, msg: msg, quote: quote, tethering: tethering}
+      const url =  'note/'
+      alert('쪽지를 보냅니다.')
+      $.ajax({
+        url: url,
+        type: 'POST',
+        data: JSON.stringify(data),
+        datatype: "json",
+        success: function(xhr, status){
+          alert(status);
+        },
+        error:function(request,status,error){
+          alert('도중에 에러가 발생했습니다.')
+        }
+      })      
+    });
+    $('#delete').on('click', function (e) {
+      const accs = $('#assignedAccount').val();
+      const receivers = $('#assignedReceiver').val();
+      const msg = $('#assignedMessage').val();
+      const quote = $('#assignedQuote').val();
+      const data = {accs: accs, receivers: receivers, msg: msg, quote: quote}
+      const url = 'data/delete/'
+      $.ajax({
+        url: url,
+        type: 'DELETE',
+        data: JSON.stringify(data),
+        datatype: "json",
+        success: function(xhr, status){
+          alert(status);
+        },
+        error:function(request,status,error){
+          alert('도중에 에러가 발생했습니다.')
+        }
+      })      
+    });
+    $('#accoount_insert').on('click', function (e) {
+      const nid = $('#acc_nid').val()
+      const npw = $('#acc_npw').val()      
+      const formData = new FormData();
+      
+      formData.append('excelfile', document.querySelector('#account_file').files[0]);
+      console.log(formData.get('excelfile'))
+      const url = 'account/register/'
+      if (formData.get('excelfile') !== 'undefined') {
+        $.ajax({          
+          url: url,
+          type: 'POST',
+          data: formData,
+          contentType: false, // NEEDED, DON'T OMIT THIS (requires jQuery 1.6+)
+          processData: false, // NEEDED, DON'T OMIT THIS                    
+          success: function(xhr, status){
+            alert(status);
+          },
+          error:function(request,status,error){                
+            alert(request.responseJSON.error_msg)
+          }
+        });
+      }
+      else{        
+        let data = {nid: nid, npw: npw}
+        console.log(data)
+        alert('계정 등록합니다.')
+        $.ajax({
+          url: url,
+          type: 'POST',
+          data: JSON.stringify(data),
+          datatype: "json",
+          success: function(xhr, status){
+            alert(status);
+          },
+          error:function(request,status,error){                
+            alert(request.responseJSON.error_msg)
+          }
+        });
+      }
+    });
+    $('#msg_add').on('click', function (e) {
+      const msg = document.getElementsByName("msg")[0].value;
+      const data = {msg: msg}
+      const url = 'msg/register/'
+      $.ajax({
+        url: url,
+        type: 'POST',
+        data: JSON.stringify(data),
+        datatype: "json",
+        success: function(xhr, status){
+          alert(status);
+        },
+        error:function(request,status,error){                
+          alert(request.responseJSON.error_msg)
+        }
+      });
+    });
+    $('#quote_add').on('click', function (e) {
+      const msg = document.getElementsByName("quote")[0].value;
+      const data = {msg: msg}
+      const url = 'quote/register/'
+      $.ajax({
+        url: url,
+        type: 'POST',
+        data: JSON.stringify(data),
+        datatype: "json",
+        success: function(xhr, status){
+          alert(status);
+        },
+        error:function(request,status,error){                
+          alert(request.responseJSON.error_msg)
+        }
+      });
+    });
+    $('#collect').on('click', function (e) {
+      const keyword = document.getElementsByName("keyword")[0].value;
+      const data = {keyword: keyword}
+      const url = 'bloger/keyword/collect/'
+      $.ajax({
+        url: url,
+        type: 'POST',
+        data: JSON.stringify(data),
+        datatype: "json",
+        success: function(xhr, status){
+          alert(status);
+        },
+        error:function(request,status,error){                
+          alert(request.responseJSON.error_msg)
+        }
+      });
+    })
+    $('#receiver_nid').on('click', function (e) {
+      const nid = document.getElementsByName("nid")[0].value;
+      const data = {nid: nid}
+      const url = 'bloger/user/register/nid/'
+      $.ajax({
+        url: url,
+        type: 'POST',
+        data: JSON.stringify(data),
+        datatype: "json",
+        success: function(xhr, status){
+          alert(status);
+        },
+        error:function(request,status,error){                
+          alert(request.responseJSON.error_msg)
+        }
+      });
+    });
+  </script>
+ <script>
+   
+ </script>
+</body>
+
+</html>
+
+
