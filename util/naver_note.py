@@ -85,14 +85,14 @@ class Session(NaverLogin):
             with self.naver_session() as session:
                 get_token = session.post(self.urls)
         except:
-            return False
-        token = json.loads(get_token.content.decode('utf-8'))
-        if token.get('todaySentCount'):            
-            return 50 - token['todaySentCount']
+            return '아이디 및 비밀번호 또는 캡차를 확인 해주세요'
+        token = json.loads(get_token.content.decode('utf-8'))        
+        if 'sendLimit' in token:
+            return int(token.get('sendLimit'))
         else:
             return token.get('LoginStatus')
 
-    def sending(self, msg, taker, check=False):
+    def sending(self, msg, taker):
         data = {
             "svcType": "undefined",
             "svcId": None,

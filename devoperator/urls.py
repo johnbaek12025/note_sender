@@ -9,7 +9,7 @@ urlpatterns = [
     path('note/', SendNote.as_view()),
     path('log/', SendNote.as_view()),
     path('account/', AssignAccounts.as_view()),
-    path('account/check/<int:id>/', check_account),
+    path('account/check/', check_account),
     path('account/register/', AssignAccounts.as_view()),
     path('account/delete/', AssignAccounts.as_view()),
     path('account/update/<int:id>/', AssignAccounts.as_view()),

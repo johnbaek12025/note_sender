@@ -13,6 +13,8 @@ from crawler.models import Bloger
 from devoperator.views import BasicJsonResponse
 from xlsxwriter import Workbook
 from pathlib import Path
+import pandas as pd
+
 
 class BlogerId(View):
     def get(self, req, size=None):            
@@ -21,65 +23,70 @@ class BlogerId(View):
 
     @transaction.atomic
     def post(self, req):
-        data = json.loads(req.body.decode('utf-8'))     
-        if 'keyword' in data:            
-            downloads_path = str(Path.home() / "Downloads")            
-            today = datetime.now().strftime('%Y%m%d')            
-            keyword = data['keyword']            
-            nums = [1, 31]
-            blogs = []
+        if req.FILES:            
+            blogers = self.file_handle(req.FILES['excelfile'])
             bulk_list = []
-            for i in nums:            
-                blogs.extend(self.accumulator(keyword, i))            
-            wb = Workbook(f"{downloads_path}/blog_{keyword}_{today}.xlsx")
-            ordered_list = ['nid', 'blog_name', 'keyword']
-            ws = wb.add_worksheet()
-            first_row = 0
-            for header in ordered_list:
-                col = ordered_list.index(header)
-                ws.write(first_row, col, header)
-            row = 1
-            for b in blogs:
-                for k, v in b.items():
-                    col = ordered_list.index(k)                                    
-                    ws.write(row, col, v)
-                row += 1
-            wb.close()
-            return BasicJsonResponse(is_success=True, status=200)
-
-        elif 'file' in data:
-            ids = self.file_handle(data['file'])            
-            bulk_list = []
-            for d in ids:
-                if not Bloger.objects.filter(nid=d['nid']):
-                    bulk_list.append(Bloger(nid=d['nid']))
+            for b in blogers:                   
+                if not Bloger.objects.filter(nid=b['nid']):                    
+                    bulk_list.append(Bloger(nid=b['nid'], blog_name=b['blog_name'], keyword=b['keyword']))
                 else:
-                    continue
+                    continue            
             try:
-                    Bloger.objects.bulk_create(bulk_list)
-            except DatabaseError:
-                return BasicJsonResponse(is_success=False, status=503, error_msg='잠시 기다려주신 후 다시 요청해주세요.')
+                Bloger.objects.bulk_create(bulk_list)          
+            except DatabaseError as e:                
+                return BasicJsonResponse(is_success=False, status=503, error_msg=e)
+            print('------------------')
             return BasicJsonResponse(is_success=True, status=200)
 
         else:
-            nid = data['nid']
-            try:
-                Bloger.objects.get(nid=nid)
-            except Bloger.DoesNotExist:
-                b = Bloger(nid=nid)
-                b.save()
+            data = json.loads(req.body.decode('utf-8'))     
+            if 'keyword' in data:            
+                downloads_path = str(Path.home() / "Downloads")            
+                today = datetime.now().strftime('%Y%m%d')            
+                keyword = data['keyword']            
+                nums = [1, 31]
+                blogs = []
+                bulk_list = []
+                for i in nums:            
+                    blogs.extend(self.accumulator(keyword, i))            
+                wb = Workbook(f"{downloads_path}/blog_{keyword}_{today}.xlsx")
+                ordered_list = ['nid', 'blog_name', 'keyword']
+                ws = wb.add_worksheet()
+                first_row = 0
+                for header in ordered_list:
+                    col = ordered_list.index(header)
+                    ws.write(first_row, col, header)
+                row = 1
+                for b in blogs:
+                    for k, v in b.items():
+                        col = ordered_list.index(k)                                    
+                        ws.write(row, col, v)
+                    row += 1
+                wb.close()                
                 return BasicJsonResponse(is_success=True, status=200)
-            return BasicJsonResponse(is_success=False, status=503, error_msg='해당 블로거가 이미 포함 되어 있습니다.')
+            
+            else:
+                nid = data['nid']
+                try:
+                    Bloger.objects.get(nid=nid)
+                except Bloger.DoesNotExist:
+                    b = Bloger(nid=nid)
+                    b.save()
+                    return BasicJsonResponse(is_success=True, status=200)
+                return BasicJsonResponse(is_success=False, status=503, error_msg='해당 블로거가 이미 포함 되어 있습니다.')
 
-
-
-    def file_handle(self, info):
-        with open(info, 'r') as f:
-            data = f.read()
-        l = []
-        for d in data.split('\n'):
-            l.append({"nid":d})
-        return l
+    def file_handle(self, excel_file):        
+        df = pd.read_excel(excel_file)
+        df = pd.DataFrame(df).iterrows()
+        data = []
+        duple = []
+        for index, row in df:
+            if row['nid'] not in duple:
+                duple.append(row['nid'])
+                data.append({'nid': row['nid'], 'blog_name': row['blog_name'], 'keyword': row['keyword']})        
+            else:
+                continue                
+        return data 
             
 
     def accumulator(self, keyword, page):        

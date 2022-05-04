@@ -79,9 +79,9 @@
                     <label for="categorization"><h3>발송 계정 할당</h3></label>
                     <div>
                       <label class="ml-3 mr-3">
-                        <small>*아이디 비밀번호를 입력 하고, 입력 버튼 누르거나 </small>
+                        <small>*아이디 비밀번호를 입력 하고, 입력 버튼 클릭하면 됩니다. </small>
                       </br>
-                        <small>*파일을 선택하고, 입력 버튼을 누르면 됩니다. 둘 다 채울시 파일만 읽습니다.</small>
+                        <small>*파일을 선택하고, 입력 버튼을 클릭하면 됩니다. 검증은 계정 하나씩만 가능 합니다.</small>
                       </label>
                     </div>                    
                     <div role="group" class="row">
@@ -112,7 +112,7 @@
                         <select id="assignedAccount" name="assignedAccount" class="select" multiple="multiple" data-placeholder=""
                                 style="width: 100%;">
                           {% for id, nid, npw in account %}
-                          <option value="{{ id }}">{{ nid }} / {{npw}}
+                          <option value="{{ id }}" id={{id}}>{{ nid }} / {{npw}}
                           </option>
                           {% endfor %}
                         </select>
@@ -124,7 +124,7 @@
                         </select>                        
                       </div>
                       <div class="form-group col-4">
-                        <button type="submit" id="accoount_cetainty" class="btn btn-primary">아이디 검증</button>
+                        <button type="button" id="accoount_cetainty" class="btn btn-primary">아이디 검증</button>
                       </div><!--form-group col-3--> 
                     </div><!--row-->                    
                   </div><!--form-group col-5-->
@@ -132,28 +132,40 @@
                     <div>
                     <label for="categorization"><h4>수신자</h4></label>
                     </div>
+                    
                     <div>
                       <label class="ml-3 mr-3">
-                        <small>*수신자를 입력 하실 경우 블로거 아이디를 입력하시고, 입력 버튼을 누르시고 </small>
+                        <small>*수신자를 입력 하실 경우 블로거 아이디를 입력하시고, 입력 버튼을 누르면 됩니다. </small>
                       </br>
-                        <small>*키워드에 대한 블로거를 수집 하실 경우 키워드를 입력 후 수집 버튼을 누르시면 됩니다.</small>
+                        <small>*키워드를 입력 후 수집 버튼을 누르면 다운로드 폴더에 엑셀로 저장됩니다.</small>
                       </label>
                     </div>                    
-                    <div class="form-group col-9">
+                    <div class="form-group col-12">
                       <div role="group" class="row">
                         <div class="form-group col-3">
                           <input type="text" class="form-control" id="nid" name="nid"
                                   placeholder="수신자">                          
                         </div><!--form-group col-3-->
-                        <div class="form-group col-3">
-                          <button type="submit" id="receiver_nid" class="btn btn-primary">입력</button>
+                        <div class="form-group col-2">
+                          <form id="excelForm" role="form" action="" method="post">
+                            {% csrf_token %}
+                            <label for="bloger_file", style=" padding: 6px 10px; background-color:#0D6EFD;border-radius: 4px;
+                            color: white;
+                            cursor: pointer;">
+                              파일
+                            </label>
+                            <input type="file" id="bloger_file" accept=".xlsx, .xls, .csv" style="display: none"/>
+                          </form>
+                        </div><!--form-group col-3--> 
+                        <div class="form-group col-2">
+                          <button type="button" id="receiver_nid" class="btn btn-primary">입력</button>
                         </div><!--form-group col-3-->
                         <div class="form-group col-3">                          
                           <input type="text" class="form-control" id="keyword" name="keyword"
                               placeholder="키워드">                          
                         </div><!--form-group col-3-->
-                        <div class="form-group col-3">
-                          <button type="submit" id="collect" class="btn btn-primary">수집</button>
+                        <div class="form-group col-2">
+                          <button type="button" id="collect" class="btn btn-primary">수집</button>
                         </div><!--form-group col-3-->                        
                         </br></br>
                         <div class="form-group col-12">
@@ -351,6 +363,7 @@
         });
       }
     });
+
     $('#msg_add').on('click', function (e) {
       const msg = document.getElementsByName("msg")[0].value;
       const data = {msg: msg}
@@ -395,29 +408,75 @@
         data: JSON.stringify(data),
         datatype: "json",
         success: function(xhr, status){
-          alert(status);
+          alert('엑셀파일이 다운로드 파일에 저장되었습니다.');
         },
         error:function(request,status,error){                
           alert(request.responseJSON.error_msg)
         }
       });
     })
-    $('#receiver_nid').on('click', function (e) {
-      const nid = document.getElementsByName("nid")[0].value;
-      const data = {nid: nid}
-      const url = 'bloger/user/register/nid/'
+
+    $('#accoount_cetainty').on('click', function (e) {
+      const accs = $('#assignedAccount').val();
+      const url = 'account/check/'
+      const data = {ids: accs}
+      console.log(accs)
+
       $.ajax({
         url: url,
         type: 'POST',
         data: JSON.stringify(data),
         datatype: "json",
         success: function(xhr, status){
-          alert(status);
+          const data = xhr['data']
+          const result = data['result']
+          const id = data['id']
+          console.log(id, result)
+          $(`#${id}`).append(` / ${result}`)
         },
         error:function(request,status,error){                
-          alert(request.responseJSON.error_msg)
+          alert(`검증 불가 ${request.responseJSON.error_msg}`)
         }
       });
+    });
+
+    $('#receiver_nid').on('click', function (e) {
+      const nid = document.getElementsByName("nid")[0].value;      
+      const url = 'bloger/user/register/'
+      const formData = new FormData();      
+      formData.append('excelfile', document.querySelector('#bloger_file').files[0]);
+      console.log(formData.get('excelfile'))
+      
+      if (formData.get('excelfile') !== 'undefined') {
+        $.ajax({          
+          url: url,
+          type: 'POST',
+          data: formData,
+          contentType: false, // NEEDED, DON'T OMIT THIS (requires jQuery 1.6+)
+          processData: false, // NEEDED, DON'T OMIT THIS                    
+          success: function(xhr, status){
+            alert('입력 완료');
+          },
+          error:function(request,status,error){                
+            alert(request.responseJSON.error_msg)
+          }
+        });
+      }
+      else{        
+        const data = {nid: nid}
+        $.ajax({
+          url: url,
+          type: 'POST',
+          data: JSON.stringify(data),
+          datatype: "json",
+          success: function(xhr, status){
+            alert(status);
+          },
+          error:function(request,status,error){                
+            alert(request.responseJSON.error_msg)
+          }
+        });
+        }
     });
   </script>
  <script>

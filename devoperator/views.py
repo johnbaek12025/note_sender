@@ -24,13 +24,24 @@ from django.views.decorators.csrf import csrf_exempt
 import pandas as pd
 
 
-def check_account(id):    
-    acc = NaverAccounts.objects.get(id=id)
-    check = Session(acc.nid, acc.npw)
-    res = check.check_account()
-    print(res)
-    
-    
+def check_account(req):
+    if req.method == 'POST':
+        data = json.loads(req.body.decode())        
+        print(data)
+        wtime = [i for i in range(2, 7)]                
+        for id in data['ids']:
+            # switchIp2()            
+            time.sleep(random.choice(wtime))
+            print(id, type(id))
+            acc = NaverAccounts.objects.get(id=id)
+            check = Session(acc.nid, acc.npw)
+            res = check.check_account()            
+            if isinstance(res, str):
+                return BasicJsonResponse(data={'id': id, "result": 'X'})
+            else:
+                return BasicJsonResponse(data={'id': id, "result": res})
+        
+            
 
 def main_page(req):
     if req.method == 'GET':
@@ -199,7 +210,7 @@ class AssignAccounts(View):
             nid = data['nid']
             npw = data['npw']
             try:            
-                x = NaverAccounts.objects.get(nid=nid)            
+                NaverAccounts.objects.get(nid=nid)            
             except NaverAccounts.DoesNotExist:
                 NaverAccounts(**data).save()
                 return BasicJsonResponse(is_success=True, status=200,)            
