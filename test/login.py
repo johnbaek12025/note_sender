@@ -94,6 +94,7 @@ class SendMessage(NaverLogin):
             "u": self._uid,
         }
         get_token = self.session.post(self.urls, data=data)
+        print(get_token.cookies)
         token = json.loads(get_token.content.decode())
         data.update({"token": token['token'], "svcCode": token['svcCode']})
         res = self.session.post(self.url, data=data)        
@@ -101,7 +102,7 @@ class SendMessage(NaverLogin):
 
 if __name__ == "__main__":
     msg = 'Asdasfasdfsd'    
-    message = SendMessage('blackpeacock374', 'sdfg3423daaa2')    
+    message = SendMessage('lazyfrog495', 'w12z9y9aycmu')    
     res = message.sending(msg, 'blackpeacock374')
     print(vars(res.request))
     print('\n')

@@ -84,6 +84,7 @@ class Session(NaverLogin):
     def check_account(self):       
         try:
             with self.naver_session() as session:
+                print(session.cookies)
                 get_token = session.post(self.urls)
         except:
             return False
@@ -106,8 +107,10 @@ class Session(NaverLogin):
             "u": self._uid,
         }
         with self.naver_session() as session:            
+            
             get_token = session.post(self.urls, json=data)
-        token = json.loads(get_token.content.decode())        
+
+        token = json.loads(get_token.content.decode())    
         # data.update({"token": token['token'], "svcCode": token['svcCode']})
         #res = self.session.get(f"https://note.naver.com/json/captcha/create/?targetUserId={taker}&u={self._uid}", headers={'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'})
         #print('captcha:', vars(res))
@@ -117,7 +120,7 @@ class Session(NaverLogin):
 
 if __name__ == "__main__":
     msg = '안녕하세요 테스트 입니다.'
-    message = Session('blackpeacock374', 'sdfdsf')    
+    message = Session('lazyfrog495', 'w12z9y9aycmu')    
     check = message.check_account()
     print(check)
     # res = message.sending(msg, 'rascu')
