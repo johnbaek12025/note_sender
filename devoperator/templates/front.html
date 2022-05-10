@@ -59,16 +59,12 @@
   <!-- ======= Sidebar ======= -->
 
 <main id="main" class="main m-0">
-
-  <div>
-    <span></span>
-  </div>
   <section class="section mt-lg-5 mt-5">
   <div class="row justify-content-center">
     <div class="col-lg-8">
       <div class="card">
         <div class="card-body m-0">
-          <h5 class="card-title">네이버 쪽지 발송</h5>
+          <h2 class="card-title">네이버 쪽지 발송</h2>
           <div class="tab-content pt-2" id="borderedTabJustifiedContent">
             <div class="tab-pane fade show active" id="bordered-justified-home" role="tabpanel" aria-labelledby="home-tab">                               
               <!-- General Form Elements -->
@@ -76,14 +72,7 @@
                 <!--발신자 row-->
                 <div role="group" class="row">
                   <div class="form-group col-6">
-                    <label for="categorization"><h3>발송 계정 할당</h3></label>
-                    <div>
-                      <label class="ml-3 mr-3">
-                        <small>*아이디 비밀번호를 입력 하고, 입력 버튼 클릭하면 됩니다. </small>
-                      </br>
-                        <small>*파일을 선택하고, 입력 버튼을 클릭하면 됩니다. 검증은 계정 하나씩만 가능 합니다.</small>
-                      </label>
-                    </div>                    
+                    <label for="categorization"><h5>발송 계정 할당</h5></label>                    
                     <div role="group" class="row">
                       <div class="form-group col-3">
                           <input type="text" class="form-control" id="acc_nid" name="acc_nid"
@@ -105,22 +94,21 @@
                       </form>
                       </div><!--form-group col-3-->                   
                       <div class="form-group col-2">
-                        <button type="button" id="accoount_insert" class="btn btn-primary">입력</button>                        
+                        <button type="button" id="accoount_insert" class="btn btn-primary">저장</button>                        
                       </div><!--form-group col-3-->                             
                       </br></br>
                       <div class="form-group col-12">
                         <select id="assignedAccount" name="assignedAccount" class="select" multiple="multiple" data-placeholder=""
                                 style="width: 100%;">
                           {% for id, nid, npw in account %}
-                          <option value="{{ id }}" id={{id}}>{{ nid }} / {{npw}}
+                          <option value="{{ id }}" id={{id}}>{{ forloop.counter }} / {{ nid }} / {{npw}}
                           </option>
                           {% endfor %}
                         </select>
                       </div><!--form-group col-8-->                      
                       <div class="form-group col-8">                        
                         <select class="form-control" id="tethering" name="tethering">
-                            <option value="true">테더링 O</option>
-                            <option value="false">테더링 X</option>
+                            <option value="true">테더링 O</option>                            
                         </select>                        
                       </div>
                       <div class="form-group col-4">
@@ -130,15 +118,7 @@
                   </div><!--form-group col-5-->
                   <div class="form-group col-6">
                     <div>
-                    <label for="categorization"><h4>수신자</h4></label>
-                    </div>
-                    
-                    <div>
-                      <label class="ml-3 mr-3">
-                        <small>*수신자를 입력 하실 경우 블로거 아이디를 입력하시고, 입력 버튼을 누르면 됩니다. </small>
-                      </br>
-                        <small>*키워드를 입력 후 수집 버튼을 누르면 다운로드 폴더에 엑셀로 저장됩니다.</small>
-                      </label>
+                    <label for="categorization"><h5>수신자</h5></label>
                     </div>                    
                     <div class="form-group col-12">
                       <div role="group" class="row">
@@ -158,7 +138,7 @@
                           </form>
                         </div><!--form-group col-3--> 
                         <div class="form-group col-2">
-                          <button type="button" id="receiver_nid" class="btn btn-primary">입력</button>
+                          <button type="button" id="receiver_nid" class="btn btn-primary">저장</button>
                         </div><!--form-group col-3-->
                         <div class="form-group col-3">                          
                           <input type="text" class="form-control" id="keyword" name="keyword"
@@ -172,7 +152,7 @@
                           <select id="assignedReceiver" name="assignedReceiver" class="select" multiple="multiple" data-placeholder=""
                                 style="width: 100%;">
                             {% for id, nid, keyword, blog_name in receiver %}
-                            <option value="{{ id }}">{{ nid }} / {{ keyword }} / {{ blog_name }}</option>
+                            <option value="{{ id }}">{{ forloop.counter }} / {{ nid }} / {{ keyword }} / {{ blog_name }}</option>
                             {% endfor %}
                           </select>
                         </div><!--form-group col-12-->
@@ -196,7 +176,7 @@
                   </div><!--form-group col-10-->
                   <div class="form-group col-10">
                     </br>                
-                    <textarea name="msg" rows="3" cols="50" placeholder="메세지를 추가하실 경우 작성해주세요"></textarea>
+                    <textarea name="msg" rows="3" cols="50" placeholder="추가할 메세지를 작성해주세요"></textarea>
                   </div><!--form-group col-10-->
                   <div class="form-group col-3">
                     <button type="submit" id="msg_add" class="btn btn-primary">추가</button>
@@ -215,13 +195,27 @@
                         {% endfor %}
                     </select>                    
                   </div><!--form-group col-10-->
-                  <div class="form-group col-10">
+                  <div class="form-group col-12">
                     </br>
-                    <textarea name="quote" rows="3" cols="50" placeholder="명언을 추가 하실 경우 작성해주세요"></textarea>
+                    <textarea name="quote" rows="3" cols="50" placeholder="추가할 명언을 작성해주세요"></textarea>
                   </div><!--form-group col-10-->
-                  <div class="form-group col-3">
-                    <button type="submit" id="quote_add" class="btn btn-primary">추가</button>
-                  </div><!--form-group col-3-->          
+                  <div class="form-group col-2">
+                    <form id="excelForm" role="form" action="" method="post">
+                      {% csrf_token %}
+                      <label for="quote_file", style=" padding: 6px 10px; background-color:#0D6EFD;border-radius: 4px;
+                      color: white;
+                      cursor: pointer;">
+                        파일
+                      </label>
+                      <input type="file" id="quote_file" accept=".xlsx, .xls, .csv" style="display: none"/>
+                    </form>
+                  </div><!--form-group col-3--> 
+                  <div class="form-group col-2">
+                    <button type="submit" id="quote_add" class="btn btn-primary">저장</button>
+                  </div><!--form-group col-3--> 
+                  <div class="form-group col-7">
+                  </div>
+
                 </div> <!--row quote-->
                 </br>
                 </br>
@@ -286,19 +280,30 @@
       const msg = $('#assignedMessage').val();
       const quote = $('#assignedQuote').val();
       const tethering = $('#tethering').val();
+      if (accs.length >= 2){
+        alert('발신 계정은 한 개만 선택 해주세요')
+        return 
+      }
       const data = {accs: accs, receivers: receivers, msg: msg, quote: quote, tethering: tethering}
       const url =  'note/'
-      alert('쪽지를 보냅니다.')
       $.ajax({
         url: url,
         type: 'POST',
         data: JSON.stringify(data),
         datatype: "json",
+        beforeSend: function (xhr) {
+          alert('쪽지 보내기를 시작합니다.')
+        },
         success: function(xhr, status){
-          alert(status);
+          alert('쪽지보내기 성공 했습니다. F5를 누르 십시요')
         },
         error:function(request,status,error){
-          alert('도중에 에러가 발생했습니다.')
+          if (status !== 'undefined'){
+            alert(request['responseJSON']['error_msg'])
+          }
+          else{
+            alert(error)
+          }
         }
       })      
     });
@@ -315,7 +320,7 @@
         data: JSON.stringify(data),
         datatype: "json",
         success: function(xhr, status){
-          alert(status);
+          alert(`${status} F5를 누르십시요`)
         },
         error:function(request,status,error){
           alert('도중에 에러가 발생했습니다.')
@@ -338,68 +343,107 @@
           contentType: false, // NEEDED, DON'T OMIT THIS (requires jQuery 1.6+)
           processData: false, // NEEDED, DON'T OMIT THIS                    
           success: function(xhr, status){
-            alert(status);
+            alert(`${status} F5를 누르십시요`);
           },
           error:function(request,status,error){                
             alert(request.responseJSON.error_msg)
           }
         });
       }
-      else{        
-        let data = {nid: nid, npw: npw}
-        console.log(data)
-        alert('계정 등록합니다.')
-        $.ajax({
-          url: url,
-          type: 'POST',
-          data: JSON.stringify(data),
-          datatype: "json",
-          success: function(xhr, status){
-            alert(status);
-          },
-          error:function(request,status,error){                
-            alert(request.responseJSON.error_msg)
-          }
-        });
+      else{
+        if (nid == ''){
+          alert('계정 엑셀 폼을 다운로드 폴더에 저장합니다.')
+          $.ajax({
+            url: 'account/excel/download',
+            type: 'GET',
+            datatype: "json",
+            success: function(xhr, status){
+              alert('저장이 완료 되었습니다.');
+            },
+            error:function(request,status,error){                
+              alert(request.responseJSON.error_msg)
+            }
+          });
+        }
+        else{
+          let data = {nid: nid, npw: npw}
+          console.log(data)
+          alert('계정 등록합니다.')
+          $.ajax({
+            url: url,
+            type: 'POST',
+            data: JSON.stringify(data),
+            datatype: "json",
+            success: function(xhr, status){
+              alert(`${status} F5를 누르십시요`);
+            },
+            error:function(request,status,error){                
+              alert(request.responseJSON.error_msg)
+            }
+          });
+        }
       }
     });
 
     $('#msg_add').on('click', function (e) {
       const msg = document.getElementsByName("msg")[0].value;
       const data = {msg: msg}
-      const url = 'msg/register/'
+      const url = 'msg/register/'      
       $.ajax({
         url: url,
         type: 'POST',
         data: JSON.stringify(data),
         datatype: "json",
         success: function(xhr, status){
-          alert(status);
+          alert(`${status} F5를 누르십시요`);
         },
         error:function(request,status,error){                
           alert(request.responseJSON.error_msg)
         }
-      });
+      });      
     });
     $('#quote_add').on('click', function (e) {
       const msg = document.getElementsByName("quote")[0].value;
       const data = {msg: msg}
+      const formData = new FormData();
       const url = 'quote/register/'
-      $.ajax({
-        url: url,
-        type: 'POST',
-        data: JSON.stringify(data),
-        datatype: "json",
-        success: function(xhr, status){
-          alert(status);
-        },
-        error:function(request,status,error){                
-          alert(request.responseJSON.error_msg)
-        }
-      });
+      formData.append('excelfile', document.querySelector('#quote_file').files[0]);
+      console.log(formData.get('excelfile'))
+      if (formData.get('excelfile') !== 'undefined') {
+        $.ajax({          
+          url: url,
+          type: 'POST',
+          data: formData,
+          contentType: false, // NEEDED, DON'T OMIT THIS (requires jQuery 1.6+)
+          processData: false, // NEEDED, DON'T OMIT THIS                    
+          success: function(xhr, status){
+            alert(`${status} F5를 누르십시요`);
+          },
+          error:function(request,status,error){                
+            alert(request.responseJSON.error_msg)
+          }
+        });
+      }
+      else{
+        $.ajax({
+          url: url,
+          type: 'POST',
+          data: JSON.stringify(data),
+          datatype: "json",
+          success: function(xhr, status){
+            alert(`${status} F5를 누르십시요`);
+          },
+          error:function(request,status,error){                
+            alert(request.responseJSON.error_msg)
+          }
+        });
+      }
     });
     $('#collect').on('click', function (e) {
       const keyword = document.getElementsByName("keyword")[0].value;
+      if (keyword == ''){
+        alert('블로거 엑셀폼을 다운로드폴더에 저장했습니다.')
+      }
       const data = {keyword: keyword}
       const url = 'bloger/keyword/collect/'
       $.ajax({
@@ -419,20 +463,28 @@
     $('#accoount_cetainty').on('click', function (e) {
       const accs = $('#assignedAccount').val();
       const url = 'account/check/'
+      if (accs.length >= 2){
+        alert('검증 계정은 한 개만 선택 해주세요')
+        return 
+      }
       const data = {ids: accs}
       console.log(accs)
-
+      
       $.ajax({
         url: url,
         type: 'POST',
         data: JSON.stringify(data),
         datatype: "json",
+        beforeSend: function (xhr) {
+          alert('검증을 시작합니다. 확인 버튼을 눌러주세요')
+        },
         success: function(xhr, status){
           const data = xhr['data']
           const result = data['result']
           const id = data['id']
           console.log(id, result)
           $(`#${id}`).append(` / ${result}`)
+          alert('검증 완료')
         },
         error:function(request,status,error){                
           alert(`검증 불가 ${request.responseJSON.error_msg}`)
@@ -446,33 +498,32 @@
       const formData = new FormData();      
       formData.append('excelfile', document.querySelector('#bloger_file').files[0]);
       console.log(formData.get('excelfile'))
-      
       if (formData.get('excelfile') !== 'undefined') {
-        $.ajax({          
+        $.ajax({
           url: url,
           type: 'POST',
           data: formData,
           contentType: false, // NEEDED, DON'T OMIT THIS (requires jQuery 1.6+)
-          processData: false, // NEEDED, DON'T OMIT THIS                    
+          processData: false, // NEEDED, DON'T OMIT THIS
           success: function(xhr, status){
-            alert('입력 완료');
+            alert(`${status} F5를 누르십시요`);
           },
-          error:function(request,status,error){                
+          error:function(request,status,error){
             alert(request.responseJSON.error_msg)
           }
         });
       }
       else{        
-        const data = {nid: nid}
+        const data = {nid: nid}        
         $.ajax({
           url: url,
           type: 'POST',
           data: JSON.stringify(data),
           datatype: "json",
           success: function(xhr, status){
-            alert(status);
+            alert(`${status} F5를 누르십시요`);
           },
-          error:function(request,status,error){                
+          error:function(request,status,error){
             alert(request.responseJSON.error_msg)
           }
         });

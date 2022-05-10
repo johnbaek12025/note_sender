@@ -87,8 +87,8 @@ class Session(NaverLogin):
         except:
             return '아이디 및 비밀번호 또는 캡차를 확인 해주세요'
         token = json.loads(get_token.content.decode('utf-8'))        
-        if 'sendLimit' in token:
-            return int(token.get('sendLimit'))
+        if 'todaySentCount' in token:
+            return 50-int(token.get('todaySentCount'))
         else:
             return token.get('LoginStatus')
 
@@ -105,10 +105,10 @@ class Session(NaverLogin):
         }
         with self.naver_session() as session:
             get_token = session.post(self.urls, json=data)
-        token = json.loads(get_token.content.decode())        
+        token = json.loads(get_token.content.decode())    
         data.update({"token": token['token'], "svcCode": token['svcCode']})
         #res = self.session.get(f"https://note.naver.com/json/captcha/create/?targetUserId={taker}&u={self._uid}", headers={'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'})
         #print('captcha:', vars(res))     
         with self.naver_session() as session:
-            res = session.post(self.url, data=data, headers={'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'})        
+            res = session.post(self.url, data=data, headers={'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'})
         return res

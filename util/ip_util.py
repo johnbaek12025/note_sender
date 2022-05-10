@@ -65,14 +65,14 @@ def get_myip(wait_seconds=180, proxy=None):
                 return 'Failure'
             time.sleep(2)
 
-def switchIp2():
+def switchIp2(get_ip=False):
 
     ##안드로이드 버전 높은 경우
     n = 1
 
     while True:
         startTime = time.time()
-        print('아이피 변경 시도(' + str(n) + '회)')
+        print('아이피 변경 시도(' + str(n) + '회)')        
         latestIp = get_myip()
         os.system(r'adb shell svc data disable')
         time.sleep(0.5)
@@ -84,7 +84,7 @@ def switchIp2():
             return currentIp
         else:
             print('10s waiting ...')
-            return currentIp
+            return False
 
 
 def get_client_ip(request):

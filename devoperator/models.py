@@ -22,7 +22,7 @@ class NoteSendingLog(models.Model):
     try_at = models.DateTimeField(auto_now_add=True)
     try_at_date = models.CharField(db_index=True, max_length=10)
     msg = models.TextField()
-    receiver = models.ForeignKey('crawler.Bloger', on_delete=models.CASCADE)
+    receivers = models.ForeignKey('crawler.Bloger', on_delete=models.CASCADE)
     
 
 class Ip(models.Model):
