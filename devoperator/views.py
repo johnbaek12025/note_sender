@@ -26,7 +26,7 @@ from util.ip_util import switchIp2, get_myip
 from util.naver_note import Session
 from django.views.decorators.csrf import csrf_exempt
 import pandas as pd
-
+from django.db.models import Q
 
 def check_account(req):
     if req.method == 'POST':
@@ -68,7 +68,7 @@ def main_page(req):
         data['account'] = [(a.id, a.nid, a.npw)for a in NaverAccounts.objects.all()]
         data['message'] = [(m.id, m.msg)for m in Message.objects.all()]        
         data['quote'] = [(q.id, q.msg)for q in Quote.objects.all()]
-        data['log'] = ((l.id, l.account.nid, "성공" if l.is_success else l.error_msg, l.receivers.nid, l.ip.address,)for l in NoteSendingLog.objects.select_related('account').select_related('receivers').select_related('ip').filter(try_at_date=todate))
+        data['log'] = ((l.id, l.account.nid, "성공" if l.is_success else l.error_msg, l.receivers.nid, l.ip.address,)for l in NoteSendingLog.objects.select_related('account').select_related('receivers').select_related('ip').filter(try_at_date=todate).order_by('try_at'))
         return render(req, "front.html", context=data)
     elif req.method == 'DELETE':
         data = json.loads(req.body.decode('utf-8'))
@@ -120,25 +120,24 @@ class SendNote(View):
         data = json.loads(req.body.decode('utf-8'))
         acc_ids = data.get('accs') # 발신 계정들
         msg_ids = data.get('msg') # 메시지        
-        receiver_ids = data.get('receivers') # 수신자        
+        receiver_ids = data.get('receiver') # 수신자        
         quote_ids = data.get('quote', '') # 명언 포함 여부               
-        tether_bul = data.get('tether', True) # 테더링유무                
+        tether_bul = True # 테더링유무
         if not acc_ids:
             return BasicJsonResponse(is_success=False, status=503, error_msg='선택된 계정이 없습니다.')
         if len(acc_ids) > 1:
             return BasicJsonResponse(is_success=False, status=503, error_msg='발신 계정은 한 개만 선택 해주세요')
         if not receiver_ids:
-            return BasicJsonResponse(is_success=False, status=503, error_msg='선택된 수신자 아이디가 없습니다.')                
-        if msg_ids:            
+            return BasicJsonResponse(is_success=False, status=503, error_msg='선택된 수신자 아이디가 없습니다.')
+        if msg_ids:
             msgs = Message.objects.filter(id__in=msg_ids).values()
         else:
             return BasicJsonResponse(is_success=False, status=503, error_msg='선택된 메세지가 없습니다.')
         if quote_ids:
-            quotes = Quote.objects.filter(id__in=quote_ids).values()        
-        msgs = [f"{m['msg']}\n\n{q['msg']}" for m in msgs for q in quotes]  
-        wtime = [i for i in range(2, 7)]        
-        bulk_list = []
-        for acc in NaverAccounts.objects.filter(id__in=acc_ids):            
+            quotes = Quote.objects.filter(id__in=quote_ids).values()
+        msgs = [f"{m['msg']}\n\n{q['msg']}" for m in msgs for q in quotes]
+        wtime = [i for i in range(2, 7)]
+        for acc in NaverAccounts.objects.filter(id__in=acc_ids):
             session = Session(acc.nid, acc.npw)
             ip_object = current_ip(tether_bul)
             time.sleep(random.choice(wtime))
@@ -146,61 +145,63 @@ class SendNote(View):
             if not limit_cnt:
                 return BasicJsonResponse(is_success=False, status=503, error_msg='해당 계정은 오늘 50개의 쪽지를 다 보냈습니다.')
             today = datetime.now().strftime('%Y-%m-%d')
-            msg = random.choice(msgs)            
+            msg = random.choice(msgs)          
+            time.sleep(random.choice(wtime))                     
             for r in Bloger.objects.filter(id__in=receiver_ids):
                 result = session.sending(msg, r.nid)
                 time.sleep(random.choice(wtime))
-                res = json.loads(result.content.decode())                
+                res = json.loads(result.content.decode())
                 if 'failUserList' in res:
-                    bulk_list.append(NoteSendingLog(
+                    l = NoteSendingLog(
                                 account=acc,
                                 receivers=r,
                                 ip=ip_object,
                                 error_msg = res['Message'],
                                 try_at_date=today,
-                                msg=f"{r.nid} 전송 실패"))                    
+                                msg=f"{r.nid} 전송 실패")
+                    l.save()
                 elif 'Result' in res:
-                    bulk_list.append(NoteSendingLog(
+                    l = NoteSendingLog(
                                 account=acc,
                                 receivers=r,
                                 ip=ip_object,
                                 error_msg = res['LoginStatus'],
                                 try_at_date=today,
-                                msg=f"{r.nid} 전송 실패"
-                    ))
+                                msg=f"{r.nid} 전송 실패")
+                    l.save()
                 else:
-                    bulk_list.append(NoteSendingLog(
+                    l = NoteSendingLog(
                                 account=acc,
                                 receivers=r,
                                 ip=ip_object,
                                 is_success=True,
                                 try_at_date=today,
-                                msg=res['Message']
-                    ))                    
-        try:
-            NoteSendingLog.objects.bulk_create(bulk_list)
-        except DatabaseError as e:                
-                return BasicJsonResponse(is_success=False, status=503, error_msg=e)
-
+                                msg=res['Message'])
+                    l.save()
         return BasicJsonResponse(is_success=True, status=200)
 
     
     def get(self, req):        
-        todate = datetime.now().strftime('%Y-%m-%d')
-        log = NoteSendingLog.objects.select_related('account').select_related('ip').select_related('receivers').filter(try_at_date=todate)        
-        for l in log:
-            yield{
-                "account": l.account.nid,
-                "msg":l.msg,
-                "ip": l.ip.address,
-                "receiver": l.receiver.nid,
-                "blog_name": l.receiver.blog_name,
-                "keyword": l.receiver.keyword,
-                "result": l.is_success if l.is_success else l.error_msg,
-                "try_date": l.try_at_date,
-                "try_at": l.try_at,
-            }
-        
+        def log_gen(log_qs):
+            for l in log_qs:
+                yield {
+                    "account": l.account.nid,
+                    "msg":l.msg,
+                    "ip": l.ip.address,
+                    "receiver": l.receivers.nid,
+                    "blog_name": l.receivers.blog_name,
+                    "keyword": l.receivers.keyword,
+                    "result": l.is_success if l.is_success else l.error_msg,
+                    "try_date": l.try_at_date,
+                    "try_at": l.try_at.strftime('%Y-%m-%d %H:%M'),
+                    }
+        data = {
+            "data": [],
+        }
+        todate = datetime.now().strftime('%Y-%m-%d')        
+        logs = NoteSendingLog.objects.select_related('account').select_related('ip').select_related('receivers').filter(try_at_date=todate)                
+        data["data"].extend(log_gen(logs))
+        return HttpResponse(json.dumps(data["data"]), content_type="application/json")
     
 
 class AssignAccounts(View):
@@ -281,12 +282,11 @@ class AddMsg(View):
                 return BasicJsonResponse(is_success=False, status=503, error_msg=e)
             return BasicJsonResponse(is_success=True, status=200)
 
-
         else:
             data = json.loads(req.body.decode('utf-8'))
             msg = data['msg']        
             try:
-                l = self.model.objects.filter(msg__in=msg)
+                l = self.model.objects.get(msg=msg)                
             except self.model.DoesNotExist:
                 self.model(**data).save()
                 return BasicJsonResponse(
