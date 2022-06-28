@@ -86,7 +86,9 @@ def switchIp2():
             return currentIp
         else:
             print('10s waiting ...')
-            time.sleep(10)
+            time.sleep(2)
+            if n >= 3:
+                return False
 
 
 if __name__ == "__main__":

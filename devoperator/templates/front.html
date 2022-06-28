@@ -105,14 +105,14 @@
                           {% endfor %}
                         </select>
                       </div><!--form-group col-8-->                      
-                      <div class="form-group col-8">                        
+                      {% comment %} <div class="form-group col-8">                        
                         <select class="form-control" id="tethering" name="tethering">
                             <option value="true">테더링 O</option>                            
                         </select>                        
-                      </div>
-                      <div class="form-group col-4">
+                      </div> {% endcomment %}
+                      {% comment %} <div class="form-group col-4">
                         <button type="button" id="accoount_cetainty" class="btn btn-primary">아이디 검증</button>
-                      </div><!--form-group col-3--> 
+                      </div><!--form-group col-3-->  {% endcomment %}
                     </div><!--row-->                    
                   </div><!--form-group col-5-->
                   <div class="form-group col-6">
@@ -236,7 +236,7 @@
                   <div class="col-lg-1">
                     <label class="col-sm-2 col-form-label"></label>                                  
                     <div class="row mb-3">
-                      <button type="submit" id="delete" class="btn btn-primary">지우기</button>
+                      <button type="button" id="delete" class="btn btn-primary">지우기</button>
                     </div><!--row mb-3-->
                   </div><!--form-group col-lg-1-->
                 </div><!--row log-->                            
@@ -269,16 +269,14 @@
   <script src="{%static 'assets/js/main.js' %}"></script>
   <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>   
   <script>    
-   $(document).ready(function(){
+   $(document).ready(function log(){
     $.ajax({
       type: 'get',
       url: 'log/',
       datatype: 'JSON',
-      success: function(data){
-        data
-        for(let d of data){
-          let form = `<option>${d["account"]}의 ${d["ip"]}을 통한 ${d["receiver"]} 발송 결과: ${d["result"]} ${d['try_at']}</option>`
-          $("#assignedlog").append(form);
+      success: function(data){          
+        for(let d of data){          
+          $("#assignedlog").append(d["log"]);
         }
       },
       error:function(request,status,error){
@@ -291,39 +289,76 @@
       }
     })
     });
+    function range(start, end, step=1) {
+      let lst = [];
+      for (let i = start; i < end; ++i) {
+        if (!(i % step)) {
+          lst.push(i);
+        }
+      }
+      return lst;
+    };
 
+    function split_arr(lst, n){
+      let arr = [];
+      let leng = lst.length
+      for (let i of range(0, leng, n))
+      {
+        if (i == leng - n - 1){
+          arr.push(lst.slice(i))
+          break;
+        }
+        else{
+          arr.push(lst.slice(i, i+n))
+        }        
+      }
+      return arr
+    };
 
     $('#submit').on('click', function (e) {
       const accs = $('#assignedAccount').val();
       const receivers = $('#assignedReceiver').val();
       const msg = $('#assignedMessage').val();
-      const quote = $('#assignedQuote').val();
-      const tethering = $('#tethering').val();
+      const quote = $('#assignedQuote').val();      
       const url = 'note/'
+      if (msg.length < 1){
+        alert('선택된 메세지가 없습니다.')
+        return
+      }
       if (accs.length >= 2){
         alert('발신 계정은 한 개만 선택 해주세요')
         return 
-      }      
-      let data = {accs: accs, receiver: receivers, msg: msg, quote: quote, tethering: tethering}      
-      $.ajax({
-        url: url,
+      }
+      if (receivers.length > 50){
+        alert('한 계정당 쪽지 발신 수는 50개 입니다.')
+        return
+      }
+
+      let data = {accs: accs, receiver: receivers, msg: msg, quote: quote}     
+      alert(`${receivers.length}명에게 쪽지를 보냅니다.`)
+      $.ajax({          
+        url: url,           
         type: 'POST',
         data: JSON.stringify(data),
         datatype: "json",          
-        success: function(xhr, status){
-          alert('쪽지보내기 성공 했습니다')
+        success: function result (data, status){
+          var forms = ''
+          $.each(data, function(i, v){
+            forms += v['log']              
+          });            
+          $("#assignedlog").prepend(forms);
         },
         error:function(request,status,error){
           if (status !== 'undefined'){
-            alert(request['responseJSON']['error_msg'])
+            alert(request.responseJSON.error_msg)
           }
           else{
-            alert(error)
+            alert(request)              
           }
         }
-        })      
-      
+      });
     });
+
     $('#delete').on('click', function (e) {
       const accs = $('#assignedAccount').val();
       const receivers = $('#assignedReceiver').val();
@@ -477,7 +512,7 @@
       });
     })
 
-    $('#accoount_cetainty').on('click', function (e) {
+    {% comment %} $('#accoount_cetainty').on('click', function certain (e) {
       const accs = $('#assignedAccount').val();
       const url = 'account/check/'
       if (accs.length >= 2){
@@ -493,7 +528,7 @@
         data: JSON.stringify(data),
         datatype: "json",
         beforeSend: function (xhr) {
-          alert('검증을 시작합니다. 확인 버튼을 눌러주세요')
+          alert('검증을 시작합니다.')
         },
         success: function(xhr, status){
           const data = xhr['data']
@@ -507,11 +542,11 @@
           alert(`검증 불가 ${request.responseJSON.error_msg}`)
         }
       });
-    });
+    }); {% endcomment %}
 
     $('#receiver_nid').on('click', function (e) {
       const nid = document.getElementsByName("nid")[0].value;      
-      const url = 'bloger/user/register/'
+      const url = 'blip/user/register/'
       const formData = new FormData();      
       formData.append('excelfile', document.querySelector('#bloger_file').files[0]);
       console.log(formData.get('excelfile'))

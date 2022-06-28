@@ -14,15 +14,15 @@ class NaverAccounts(models.Model):
 class NoteSendingLog(models.Model):
     class Meta:
         ordering = ["-try_at"]
-
+    birth = models.DateTimeField(db_index=True, auto_now_add=True)
     account = models.ForeignKey('NaverAccounts', on_delete=models.CASCADE)
-    ip = models.ForeignKey('Ip', on_delete=models.CASCADE)
+    ip = models.ForeignKey('Ip', on_delete=models.CASCADE, null=True)
     is_success = models.BooleanField(default=False)
-    error_msg = models.TextField(null=True, default=None, blank=True)    
-    try_at = models.DateTimeField(auto_now_add=True)
-    try_at_date = models.CharField(db_index=True, max_length=10)
+    error_msg = models.TextField(null=True, default=None, blank=True)
+    try_at = models.CharField(max_length=20, null=True)
+    try_at_date = models.CharField(max_length=10, null=True)
     msg = models.TextField()
-    receivers = models.ForeignKey('crawler.Bloger', on_delete=models.CASCADE)
+    receiver = models.ForeignKey('crawler.Bloger', on_delete=models.CASCADE)
     
 
 class Ip(models.Model):

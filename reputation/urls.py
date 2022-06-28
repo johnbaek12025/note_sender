@@ -21,7 +21,7 @@ from reputation.settings import DEBUG
 urlpatterns = [
     path('jllab/', admin.site.urls),
     path('', include('devoperator.urls')),
-    path('bloger/', include('crawler.urls'))
+    path('blip/', include('crawler.urls'))
 ]
 
 if DEBUG:

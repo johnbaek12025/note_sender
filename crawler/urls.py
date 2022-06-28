@@ -1,5 +1,5 @@
 from django.urls import path
-from crawler.views import BlogerId
+from crawler.views import BlogerId, SendCrawler
 
 
 app_name = 'clawler'
@@ -9,4 +9,6 @@ urlpatterns = [
     path('user/register/', BlogerId.as_view()),    
     path('', BlogerId.as_view()),
     path('delete/', BlogerId.as_view()),
+    path('send/get/', SendCrawler.as_view()),
+    path('send/post/', SendCrawler.as_view()),
 ]

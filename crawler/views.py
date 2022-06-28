@@ -10,10 +10,39 @@ from bs4 import BeautifulSoup as bf
 import requests
 import re
 from crawler.models import Bloger
+from devoperator.models import NoteSendingLog
 from devoperator.views import BasicJsonResponse
 from xlsxwriter import Workbook
 from pathlib import Path
 import pandas as pd
+
+
+def file_handle(excel_file):        
+        df = pd.read_excel(excel_file)
+        df = pd.DataFrame(df).iterrows()
+        data = []
+        duple = []
+        for index, row in df:
+            if row['nid'] not in duple:
+                duple.append(row['nid'])
+                data.append({'nid': row['nid'], 'blog_name': row['blog_name'], 'keyword': row['keyword']})        
+            else:
+                continue                
+        return data 
+            
+
+def accumulator(keyword, page):        
+    url = f"https://s.search.naver.com/p/blog/search.naver?where=blog&sm=tab_pge&api_type=1&query={keyword}&rev=44&start={page}&dup_remove=1&post_blogurl=&post_blogurl_without=&nso=&dkey=0&source_query=&nx_search_query={keyword}&spq=0&_callback=viewMoreContents"
+    # url = requote_uri(url)
+    res = requests.get(url)
+    info = bf(res.text, 'html.parser')
+    data = []
+    for a in info.find_all('a', {"class": '\\"sub_txt'}):    
+        res1 = re.sub(r'[a-z./:"\\]+.com/','', a['href'])
+        nid = re.sub(r'\\"','', res1)
+        b_name = a.text
+        data.append({'nid': nid, 'blog_name': b_name, 'keyword': keyword})
+    return data
 
 
 class BlogerId(View):
@@ -24,7 +53,7 @@ class BlogerId(View):
     @transaction.atomic
     def post(self, req):
         if req.FILES:            
-            blogers = self.file_handle(req.FILES['excelfile'])
+            blogers = file_handle(req.FILES['excelfile'])
             bulk_list = []
             for b in blogers:                   
                 if not Bloger.objects.filter(nid=b['nid']):                    
@@ -35,7 +64,6 @@ class BlogerId(View):
                 Bloger.objects.bulk_create(bulk_list)          
             except DatabaseError as e:                
                 return BasicJsonResponse(is_success=False, status=503, error_msg=e)
-            print('------------------')
             return BasicJsonResponse(is_success=True, status=200)
 
         else:
@@ -48,7 +76,7 @@ class BlogerId(View):
                 blogs = []
                 bulk_list = []
                 for i in nums:            
-                    blogs.extend(self.accumulator(keyword, i))            
+                    blogs.extend(accumulator(keyword, i))            
                 wb = Workbook(f"{downloads_path}/blog_{keyword}_{today}.xlsx")
                 ordered_list = ['nid', 'blog_name', 'keyword']
                 ws = wb.add_worksheet()
@@ -73,35 +101,7 @@ class BlogerId(View):
                     b = Bloger(nid=nid)
                     b.save()
                     return BasicJsonResponse(is_success=True, status=200)
-                return BasicJsonResponse(is_success=False, status=503, error_msg='해당 블로거가 이미 포함 되어 있습니다.')
-
-    def file_handle(self, excel_file):        
-        df = pd.read_excel(excel_file)
-        df = pd.DataFrame(df).iterrows()
-        data = []
-        duple = []
-        for index, row in df:
-            if row['nid'] not in duple:
-                duple.append(row['nid'])
-                data.append({'nid': row['nid'], 'blog_name': row['blog_name'], 'keyword': row['keyword']})        
-            else:
-                continue                
-        return data 
-            
-
-    def accumulator(self, keyword, page):        
-        url = f"https://s.search.naver.com/p/blog/search.naver?where=blog&sm=tab_pge&api_type=1&query={keyword}&rev=44&start={page}&dup_remove=1&post_blogurl=&post_blogurl_without=&nso=&dkey=0&source_query=&nx_search_query={keyword}&spq=0&_callback=viewMoreContents"
-        # url = requote_uri(url)
-        res = requests.get(url)
-        info = bf(res.text, 'html.parser')
-        data = []
-        for a in info.find_all('a', {"class": '\\"sub_txt'}):    
-            res1 = re.sub(r'[a-z./:"\\]+.com/','', a['href'])
-            nid = re.sub(r'\\"','', res1)
-            b_name = a.text
-            data.append({'nid': nid, 'blog_name': b_name, 'keyword': keyword})
-        return data
-        
+                return BasicJsonResponse(is_success=False, status=503, error_msg='해당 블로거가 이미 포함 되어 있습니다.')        
 
     def delete(self, req):
         data = json.loads(req.body.decode('utf-8'))
@@ -109,3 +109,16 @@ class BlogerId(View):
         bloger.delete()
         return BasicJsonResponse(is_success=True, status=200)
         
+
+class SendCrawler(View):
+    def get(self, req):
+        logs = NoteSendingLog.objects.select_related('account').select_related('receiver').filter(is_success=False)
+        data = []
+        for l in logs:
+            data.append({'acc_id': l.account.nid,
+                        'acc_pw': l.account.npw,
+                        'r_id': l.receiver.nid})
+        return BasicJsonResponse(data=data)
+
+    def post(self, req):
+        pass
