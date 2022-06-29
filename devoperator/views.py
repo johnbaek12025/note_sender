@@ -28,20 +28,20 @@ from django.views.decorators.csrf import csrf_exempt
 import pandas as pd
 from django.db.models import Q
 
-# def check_account(req):
-#     if req.method == 'POST':
-#         data = json.loads(req.body.decode())                
-#         wtime = [i for i in range(2, 7)]                
-#         for id in data['ids']:
-#             switchIp2()            
-#             time.sleep(random.choice(wtime))            
-#             acc = NaverAccounts.objects.get(id=id)
-#             check = Session(acc.nid, acc.npw)
-#             res = check.check_account()            
-#             if isinstance(res, str):
-#                 return BasicJsonResponse(data={'id': id, "result": 'X'})
-#             else:
-#                 return BasicJsonResponse(data={'id': id, "result": res})
+def check_account(req):
+    if req.method == 'POST':
+        data = json.loads(req.body.decode())                
+        wtime = [i for i in range(2, 7)]                
+        for id in data['ids']:
+            switchIp2()            
+            time.sleep(random.choice(wtime))            
+            acc = NaverAccounts.objects.get(id=id)
+            check = Session(acc.nid, acc.npw)
+            res = check.check_account()            
+            if isinstance(res, str):
+                return BasicJsonResponse(data={'id': id, "result": 'X'})
+            else:
+                return BasicJsonResponse(data={'id': id, "result": res})
         
 
 

@@ -9,6 +9,7 @@ class NaverAccounts(models.Model):
     nid = models.CharField(max_length=200)
     npw = models.CharField(max_length=200)    
     modified_at = models.DateTimeField(auto_now_add=True)
+    certainty = models.CharField(max_length=20, null=True)
 
 
 class NoteSendingLog(models.Model):

@@ -110,9 +110,9 @@
                             <option value="true">테더링 O</option>                            
                         </select>                        
                       </div> {% endcomment %}
-                      {% comment %} <div class="form-group col-4">
+                      <div class="form-group col-4">
                         <button type="button" id="accoount_cetainty" class="btn btn-primary">아이디 검증</button>
-                      </div><!--form-group col-3-->  {% endcomment %}
+                      </div><!--form-group col-3-->
                     </div><!--row-->                    
                   </div><!--form-group col-5-->
                   <div class="form-group col-6">
@@ -512,7 +512,7 @@
       });
     })
 
-    {% comment %} $('#accoount_cetainty').on('click', function certain (e) {
+    $('#accoount_cetainty').on('click', function certain (e) {
       const accs = $('#assignedAccount').val();
       const url = 'account/check/'
       if (accs.length >= 2){
@@ -542,7 +542,7 @@
           alert(`검증 불가 ${request.responseJSON.error_msg}`)
         }
       });
-    }); {% endcomment %}
+    });
 
     $('#receiver_nid').on('click', function (e) {
       const nid = document.getElementsByName("nid")[0].value;      
