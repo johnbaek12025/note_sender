@@ -276,7 +276,7 @@
       datatype: 'JSON',
       success: function(data){          
         for(let d of data){          
-          $("#assignedlog").append(d["log"]);
+          $("#assignedlog").append(`<option>${d["log"]}</option>`);
         }
       },
       error:function(request,status,error){

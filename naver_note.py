@@ -1,13 +1,20 @@
+from datetime import datetime
 from http import cookiejar
 import json
+import random
 import re
+from tabnanny import check
+import time
 import uuid
+from django.dispatch import receiver
+import numpy
 import requests
 import rsa
 import lzstring
 from urllib3.util.retry import Retry
 from requests.adapters import HTTPAdapter
 from requests.utils import requote_uri
+from util.ip_util import switchIp2
 
 
 class NaverLogin:
@@ -65,7 +72,7 @@ class NaverLogin:
             finalize_url = re.search(r'location\.replace\("([^"]+)"\)', resp.content.decode("utf-8")).group(1)
         except:
             if "안전한 로그인을 위해 주소창의 URL과 자물쇠 마크를 확인하세요!" in resp.content.decode("utf-8"):
-                print('아이디 및 비밀번호 또는 캡차를 확인 해주세요')
+                return '아이디 및 비밀번호 또는 캡차를 확인 해주세요'
         # print('f-url:', finalize_url)
         s.get(finalize_url)
         res = s.get("https://m.naver.com/aside/")
@@ -78,7 +85,7 @@ class Session(NaverLogin):
     def __init__(self, uid, upw) -> None:        
         super().__init__(uid, upw)        
         self.urls = "https://note.naver.com/json/write/"
-        self.url = "https://note.naver.com/json/write/send/"
+        self.url = "https://note.naver.com/json/write/send/"        
 
     def check_account(self):
         try:
@@ -114,3 +121,66 @@ class Session(NaverLogin):
         with self.naver_session() as session:
             res = session.post(self.url, data=data, headers={'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'})
         return res
+
+def status_validation(url, session, post_data=None):
+    time.sleep(random.choice(wtime))
+    if not post_data:            
+        res = session.get(url)            
+    else:
+        res = session.post(url, data=post_data)
+    status = res.status_code
+    if status == 200:            
+        try:                
+            return res.json()
+        except:
+            if "error" in res.text:
+                return None
+            return res.text
+    else:
+        return None
+
+
+
+if __name__ == '__main__':
+    wtime = numpy.arange(1, 3, 0.5)
+    while True:
+        session = requests.session()        
+        url = 'http://localhost:8000/blip/send/get/'
+        res = status_validation(url, session)
+        data = res.get('data')
+        if data:            
+            ip = switchIp2()            
+            acc_id = data[0]['acc_id']
+            acc_pw = data[0]['acc_pw']
+            s = Session(acc_id, acc_pw)
+            check = s.check_account()            
+            if isinstance(check, int):  
+                for data_dict in data:                    
+                    time.sleep(random.choice(wtime))
+                    post_data = {}
+                    post_data['ip'] = ip
+                    res = s.sending(data_dict['msg'], data_dict['r_id'])
+                    detail = json.loads(res.content.decode())
+                    post_data["try_at"] = datetime.now().strftime('%Y-%m-%d, %H:%M:%S')
+                    post_data["try_at_date"] = datetime.now().strftime('%Y-%m-%d')
+                    post_data['receiver'] = data_dict['r_id']
+                    post_data['msg'] = data_dict['msg']                    
+                    if detail['status'] == 'fail':
+                        post_data['error_msg'] = detail['Message']
+                    else:                        
+                        post_data['is_success'] = True
+                    url = 'http://localhost:8000/blip/send/post/'
+                    res = status_validation(url, session, post_data=json.dumps(post_data))
+                    print(res)                   
+            else:
+                for data_dict in data:
+                    post_data = {}
+                    post_data["try_at"] = datetime.now().strftime('%Y-%m-%d, %H:%M:%S')
+                    post_data["try_at_date"] = datetime.now().strftime('%Y-%m-%d')
+                    post_data['receiver'] = data_dict['r_id']
+                    post_data['msg'] = data_dict['msg']
+                    post_data['error_msg'] = check
+                    url = 'http://localhost:8000/blip/send/post/'
+                    res = status_validation(url, session, post_data=json.dumps(post_data))                    
+                    print(res)
+        time.sleep(60)

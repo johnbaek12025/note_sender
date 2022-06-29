@@ -101,27 +101,14 @@ class SendNote(View):
             "data": [],
         }
 
+    @transaction.atomic
     @csrf_exempt
     def post(self, req):
-        def current_ip(tether=True) -> QuerySet:            
-            if tether:
-                ip = switchIp2()
-            if not ip:
-                return False
-            try:                
-                get_ip = Ip.objects.get(address=ip)
-            except Ip.DoesNotExist:
-                ip_ad = Ip(address=ip)
-                ip_ad.save()
-                get_ip = Ip.objects.get(address=ip)
-            return get_ip
-
         data = json.loads(req.body.decode('utf-8'))
         acc_ids = data.get('accs') # 발신 계정들
         msg_ids = data.get('msg') # 메시지        
         receiver_ids = data.get('receiver') # 수신자        
-        quote_ids = data.get('quote', '') # 명언 포함 여부               
-        tether_bul = True # 테더링유무        
+        quote_ids = data.get('quote', '') # 명언 포함 여부                       
         if not acc_ids:
             return BasicJsonResponse(is_success=False, status=503, error_msg='선택된 계정이 없습니다.')
         if len(acc_ids) > 1:
@@ -144,12 +131,18 @@ class SendNote(View):
         except DatabaseError as e:
             return BasicJsonResponse(is_success=False, status=503, error_msg=e)
         return BasicJsonResponse(is_success=True, status=200)                
-   
-    # def get(self, req):   
-    #     todate = datetime.now().strftime('%Y-%m-%d')        
-    #     logs = NoteSendingLog.objects.select_related('account').select_related('ip').select_related('receivers').filter(try_at_date=todate)
-    #     self.data["data"].extend(self.log_gen(logs))
-    #     return HttpResponse(json.dumps(self.data["data"]), content_type="application/json")
+    
+    def log_gen(self, log_qs):
+            for l in log_qs:
+                yield {                    
+                    "log": f"계정:{l.account.nid}/ 발신자:{l.receiver.nid}/ 발신결과: {l.is_success if l.is_success else l.error_msg} 시간: {l.try_at}"
+                    }
+
+    def get(self, req):   
+        todate = datetime.now().strftime('%Y-%m-%d')        
+        logs = NoteSendingLog.objects.select_related('account').select_related('ip').select_related('receiver').filter(try_at_date=todate)
+        self.data["data"].extend(self.log_gen(logs))        
+        return HttpResponse(json.dumps(self.data["data"]), content_type="application/json")
     
 
 class AssignAccounts(View):
