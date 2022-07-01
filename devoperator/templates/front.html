@@ -113,6 +113,9 @@
                       <div class="form-group col-4">
                         <button type="button" id="accoount_cetainty" class="btn btn-primary">아이디 검증</button>
                       </div><!--form-group col-3-->
+                    <div class="form-group col-4">
+                      <p id="acc_form"></p>
+                    </div><!--form-group col-3-->
                     </div><!--row-->                    
                   </div><!--form-group col-5-->
                   <div class="form-group col-6">
@@ -155,6 +158,9 @@
                             {% endfor %}
                           </select>
                         </div><!--form-group col-12-->
+                        <div class="form-group col-4">
+                          <p id="bloger_form"></p>
+                        </div><!--form-group col-3-->
                       </div><!--"row"-->
                     </div><!--form-group col-12-->                    
                   </div><!--form-group col-7-->
@@ -403,14 +409,16 @@
         });
       }
       else{
-        if (nid == ''){
-          alert('계정 엑셀 폼을 다운로드 폴더에 저장합니다.')
+        if (nid == ''){          
           $.ajax({
             url: 'account/excel/download',
             type: 'GET',
             datatype: "json",
-            success: function(xhr, status){
-              alert('저장이 완료 되었습니다.');
+            success: function(data){
+              alert('파일 다운로드');
+              if (data !== null){                              
+                $("#acc_form").append(`<button type="button"><a href="${data['data']}" download>계정 엑셀 형식 다운</a></button>`)
+              }
             },
             error:function(request,status,error){                
               alert(request.responseJSON.error_msg)
@@ -494,17 +502,21 @@
     $('#collect').on('click', function (e) {
       const keyword = document.getElementsByName("keyword")[0].value;
       if (keyword == ''){
-        alert('블로거 엑셀폼을 다운로드폴더에 저장했습니다.')
+        alert('블로거 엑셀폼을 생성.')
       }
       const data = {keyword: keyword}
-      const url = 'bloger/keyword/collect/'
+      const url = 'blip/keyword/collect/'
       $.ajax({
         url: url,
         type: 'POST',
         data: JSON.stringify(data),
         datatype: "json",
-        success: function(xhr, status){
-          alert('엑셀파일이 다운로드 파일에 저장되었습니다.');
+        success: function(data){
+          alert('파일 다운로드');
+          if (data !== null){
+            console.log(data)                     
+            $("#bloger_form").append(`<button type="button"><a href="${data['data']}" download>다운로드</a></button>`)
+          }
         },
         error:function(request,status,error){                
           alert(request.responseJSON.error_msg)

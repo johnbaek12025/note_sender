@@ -12,6 +12,7 @@ import requests
 import re
 from crawler.models import Bloger
 from devoperator.models import Ip, NoteSendingLog
+from devoperator.utility.make_dir import create_dir
 from devoperator.views import BasicJsonResponse
 from xlsxwriter import Workbook
 from pathlib import Path
@@ -70,17 +71,19 @@ class BlogerId(View):
             return BasicJsonResponse(is_success=True, status=200)
 
         else:
-            data = json.loads(req.body.decode('utf-8'))     
-            if 'keyword' in data:            
-                downloads_path = str(Path.home() / "Downloads")            
+            data = json.loads(req.body.decode('utf-8'))            
+            if 'keyword' in data:                
                 today = datetime.now().strftime('%Y%m%d')            
                 keyword = data['keyword']            
                 nums = [1, 31]
                 blogs = []
                 bulk_list = []
                 for i in nums:            
-                    blogs.extend(accumulator(keyword, i))            
-                wb = Workbook(f"{downloads_path}/blog_{keyword}_{today}.xlsx")
+                    blogs.extend(accumulator(keyword, i))        
+                path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+                create_dir(f"{path}\\form")
+                file_name = f"blog_{keyword}_{today}.xlsx"
+                wb = Workbook(f"{path}/form/{file_name}")
                 ordered_list = ['nid', 'blog_name', 'keyword']
                 ws = wb.add_worksheet()
                 first_row = 0
@@ -93,8 +96,9 @@ class BlogerId(View):
                         col = ordered_list.index(k)                                    
                         ws.write(row, col, v)
                     row += 1
-                wb.close()                
-                return BasicJsonResponse(is_success=True, status=200)
+                wb.close()
+                print(file_name)
+                return BasicJsonResponse(data=file_name)
             
             else:
                 nid = data['nid']

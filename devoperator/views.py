@@ -1,4 +1,5 @@
 import json
+import os
 from pathlib import Path
 import random
 from sre_constants import SUCCESS
@@ -27,6 +28,7 @@ from util.naver_note import Session
 from django.views.decorators.csrf import csrf_exempt
 import pandas as pd
 from django.db.models import Q
+from devoperator.utility.make_dir import create_dir
 
 def check_account(req):
     if req.method == 'POST':
@@ -46,10 +48,12 @@ def check_account(req):
 
 
 def download_account_excel(req):
-    if req.method == 'GET':
-        downloads_path = str(Path.home() / "Downloads")            
+    if req.method == 'GET':        
         today = datetime.now().strftime('%Y%m%d')
-        wb = Workbook(f"{downloads_path}/네이버_계정_형식_{today}.xlsx")
+        path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        create_dir(f"{path}\\form")
+        file_name = f"네이버_계정_형식_{today}.xlsx"
+        wb = Workbook(f"{path}/form/{file_name}")
         ordered_list = ['아이디', '비밀번호']
         ws = wb.add_worksheet()
         first_row = 0
@@ -57,7 +61,7 @@ def download_account_excel(req):
             col = ordered_list.index(header)
             ws.write(first_row, col, header)        
         wb.close()                
-        return BasicJsonResponse(is_success=True, status=200)
+        return BasicJsonResponse(data=file_name)
     
 
 def main_page(req):
@@ -68,7 +72,6 @@ def main_page(req):
         data['account'] = [(a.id, a.nid, a.npw)for a in NaverAccounts.objects.all()]
         data['message'] = [(m.id, m.msg)for m in Message.objects.all()]        
         data['quote'] = [(q.id, q.msg)for q in Quote.objects.all()]
-        # data['log'] = ((l.id, l.account.nid, "성공" if l.is_success else l.error_msg, l.receivers.nid, l.ip.address,)for l in NoteSendingLog.objects.select_related('account').select_related('receivers').select_related('ip').filter(try_at_date=todate).order_by('try_at'))
         return render(req, "front.html", context=data)
         
     elif req.method == 'DELETE':

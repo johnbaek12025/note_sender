@@ -16,13 +16,15 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path, include
+from django.conf import settings
 from reputation.settings import DEBUG
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('jllab/', admin.site.urls),
     path('', include('devoperator.urls')),
     path('blip/', include('crawler.urls'))
 ]
-
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 if DEBUG:
     urlpatterns += [path('silk/', include('silk.urls', namespace='silk'))]
