@@ -1,4 +1,5 @@
 import json
+from multiprocessing import context
 import os
 from pathlib import Path
 import random
@@ -7,31 +8,33 @@ import time
 from datetime import datetime
 import unicodedata
 from django.dispatch import receiver
+from django.http import HttpResponse, HttpResponseRedirect
 from django.views import View
 from django.db import DatabaseError, transaction
-from django.db.models import QuerySet, Model
-from django.forms import model_to_dict
-from django.http import HttpResponse
+from django.urls import reverse, resolve
 from django.shortcuts import render
 from datetime import datetime
-
+from .common import HttpResponseBase, BasicJsonResponse, ParsedClientView
 from xlsxwriter import Workbook
 from crawler.models import Bloger
-from devoperator.models import Ip, Message, NaverAccounts, NoteSendingLog, Quote, Transition
+from devoperator.models import Ip, Message, NaverAccounts, NoteSendingLog, Quote
 from http import cookiejar
-import json
 from urllib3.util.retry import Retry
 from requests.adapters import HTTPAdapter
 from requests.utils import requote_uri
+from devoperator.utility.utility import accumulator, file_handle, generate_login_cookie, who_are_you
 from util.ip_util import switchIp2, get_myip
 from util.naver_note import Session
 from django.views.decorators.csrf import csrf_exempt
 import pandas as pd
 from django.db.models import Q
 from devoperator.utility.make_dir import create_dir
+from django.contrib.auth.hashers import make_password, check_password
 
-def check_account(req):
-    if req.method == 'POST':
+
+class CheckAccount(ParsedClientView):
+    @ParsedClientView.init_parse
+    def post(self, req):        
         data = json.loads(req.body.decode())                
         wtime = [i for i in range(2, 7)]                
         for id in data['ids']:
@@ -44,11 +47,10 @@ def check_account(req):
                 return BasicJsonResponse(data={'id': id, "result": 'X'})
             else:
                 return BasicJsonResponse(data={'id': id, "result": res})
-        
 
-
-def download_account_excel(req):
-    if req.method == 'GET':        
+class ExcelForm(ParsedClientView):
+    @ParsedClientView.init_parse
+    def get(self, req):                 
         today = datetime.now().strftime('%Y%m%d')
         path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         create_dir(f"{path}\\form")
@@ -64,49 +66,16 @@ def download_account_excel(req):
         return BasicJsonResponse(data=file_name)
     
 
-def main_page(req):
-    if req.method == 'GET':
-        data = {}
-        todate = datetime.now().strftime('%Y-%m-%d')
-        data['receiver'] = [(b.id, b.nid, b.keyword, b.blog_name) for b in Bloger.objects.all()]
-        data['account'] = [(a.id, a.nid, a.npw)for a in NaverAccounts.objects.all()]
-        data['message'] = [(m.id, m.msg)for m in Message.objects.all()]        
-        data['quote'] = [(q.id, q.msg)for q in Quote.objects.all()]
-        return render(req, "front.html", context=data)
-        
-    elif req.method == 'DELETE':
-        data = json.loads(req.body.decode('utf-8'))
-        accs = data['accs']
-        receivers = data['receivers']        
-        msg = data['msg']
-        quote = data['quote']
-        if accs:
-            acc = NaverAccounts.objects.filter(id__in=accs)
-            acc.delete()
-        if receivers:
-            rec = Bloger.objects.filter(id__in=receivers)
-            rec.delete()
-        if msg:
-            msg = [int(i)for i in data['msg']]
-            m = Message.objects.filter(id__in=msg)            
-            m.delete()
-        if quote:
-            quote = [int(i)for i in data['quote']]
-            q = Quote.objects.filter(id__in=quote)            
-            q.delete()
-        return BasicJsonResponse(is_success=True, status=200)
-
-
-class SendNote(View):
+class SendNote(ParsedClientView):
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
         self.data = {
             "data": [],
         }
-
+    @ParsedClientView.init_parse
     @transaction.atomic
     @csrf_exempt
-    def post(self, req):
+    def post(self, req):        
         data = json.loads(req.body.decode('utf-8'))
         acc_ids = data.get('accs') # 발신 계정들
         msg_ids = data.get('msg') # 메시지        
@@ -140,15 +109,16 @@ class SendNote(View):
                 yield {                    
                     "log": f"계정:{l.account.nid}/ 발신자:{l.receiver.nid}/ 발신결과: {l.is_success if l.is_success else l.error_msg} 시간: {l.try_at}"
                     }
-
-    def get(self, req):   
+    @ParsedClientView.init_parse
+    def get(self, req):             
         todate = datetime.now().strftime('%Y-%m-%d')        
         logs = NoteSendingLog.objects.select_related('account').select_related('ip').select_related('receiver').filter(try_at_date=todate)
         self.data["data"].extend(self.log_gen(logs))        
         return HttpResponse(json.dumps(self.data["data"]), content_type="application/json")
     
 
-class AssignAccounts(View):
+class AssignAccounts(ParsedClientView):
+    @ParsedClientView.init_parse
     @transaction.atomic
     def post(self, req):        
         if req.FILES:
@@ -187,30 +157,18 @@ class AssignAccounts(View):
             data.append({'nid': row['아이디'], 'npw': row['비밀번호']})
         return data 
 
-    def put(self, req, id):
-        data = json.loads(req.body.decode('utf-8'))        
-        account = NaverAccounts.objects.get(id=id)        
-        account.modified_at = datetime.now()
-        account.npw = data['npw']
-        account.save()
-        return BasicJsonResponse(is_success=True, status=200)
-
-    def get(self, req):        
-        return BasicJsonResponse(data=NaverAccounts.objects.filter())
-
-    def delete(self, req):
-        data = json.loads(req.body.decode('utf-8'))
-        acc_ids = data.get('acc_id')        
-        accs = NaverAccounts.objects.filter(id__in=acc_ids)
-        accs.delete()
-        return BasicJsonResponse(is_success=True, status=200)
+    @ParsedClientView.init_parse
+    def get(self, req):                
+        return BasicJsonResponse(data=NaverAccounts.objects.all())
 
 
-class AddMsg(View):
+
+class AddMsg(ParsedClientView):
     model = Message
 
-    @transaction.atomic
-    def post(self, req): 
+    @ParsedClientView.init_parse
+    @transaction.atomic 
+    def post(self, req):         
         if req.FILES:
             excel_file = req.FILES['excelfile']
             msgs = self.file_handle(excel_file)
@@ -249,55 +207,107 @@ class AddMsg(View):
             data.append({"msg": row['msg']})
         return data
         
-    def put(self, req):
-        data = json.loads(req.body.decode('utf-8'))
-
-    def get(self, req):
-        return BasicJsonResponse(data=self.model.objects.filter())
-
-
-class AddTrs(AddMsg):
-    model = Transition
+    @ParsedClientView.init_parse 
+    def get(self, req):        
+        return BasicJsonResponse(data=self.model.objects.all())
     
     
 class AddQ(AddMsg):
     model = Quote
 
 
+class BlogerId(ParsedClientView): 
 
+    @ParsedClientView.init_parse
+    def get(self, req, size=None):                  
+        return BasicJsonResponse(data=Bloger.objects.all())
+    
+    @ParsedClientView.init_parse
+    @csrf_exempt
+    @transaction.atomic
+    def post(self, req):        
+        if req.FILES:            
+            blogers = file_handle(req.FILES['excelfile'])
+            bulk_list = []
+            for b in blogers:                   
+                if not Bloger.objects.filter(nid=b['nid']):                    
+                    bulk_list.append(Bloger(nid=b['nid'], blog_name=b['blog_name'], keyword=b['keyword']))
+                else:
+                    continue            
+            try:
+                Bloger.objects.bulk_create(bulk_list)          
+            except DatabaseError as e:                
+                return BasicJsonResponse(is_success=False, status=503, error_msg=e)
+            return BasicJsonResponse(is_success=True, status=200)
 
-class HttpResponseBase(HttpResponse):
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._headers = self.headers 
-
-
-class BasicJsonResponse(HttpResponseBase):
-
-    def __init__(self, *, is_success: bool = True, status: int = 200, data=None, msg=None, error_msg=None, **kwargs):
-
-        json_content = dict()
-        json_content['is_success'] = is_success
-        '''""{"date": , "content": }""'''
-
-        if msg is not None:
-            json_content['msg'] = msg
-        if error_msg is not None:
-            json_content['error_msg'] = error_msg
-
-        if status is None:
-            if is_success:
-                status = 200
+        else:
+            data = json.loads(req.body.decode('utf-8'))            
+            if 'keyword' in data:                
+                today = datetime.now().strftime('%Y%m%d')            
+                keyword = data['keyword']            
+                nums = [1, 31]
+                blogs = []
+                bulk_list = []
+                for i in nums:            
+                    blogs.extend(accumulator(keyword, i))        
+                path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+                create_dir(f"{path}\\form")
+                file_name = f"blog_{keyword}_{today}.xlsx"
+                wb = Workbook(f"{path}/form/{file_name}")
+                ordered_list = ['nid', 'blog_name', 'keyword']
+                ws = wb.add_worksheet()
+                first_row = 0
+                for header in ordered_list:
+                    col = ordered_list.index(header)
+                    ws.write(first_row, col, header)
+                row = 1
+                for b in blogs:
+                    for k, v in b.items():
+                        col = ordered_list.index(k)                                    
+                        ws.write(row, col, v)
+                    row += 1
+                wb.close()                
+                return BasicJsonResponse(data=file_name)
+            
             else:
-                raise Exception("status 값을 입력해야합니다.")   # todo: custom exception class
+                nid = data['nid']
+                try:
+                    Bloger.objects.get(nid=nid)
+                except Bloger.DoesNotExist:
+                    b = Bloger(nid=nid)
+                    b.save()
+                    return BasicJsonResponse(is_success=True, status=200)
+                return BasicJsonResponse(is_success=False, status=503, error_msg='해당 블로거가 이미 포함 되어 있습니다.')        
 
-        if data is not None:
-            if type(data) is QuerySet:
-                json_content['data'] = list(data.values())
-            elif isinstance(data, Model):
-                json_content['data'] = model_to_dict(data)
-            else:
-                json_content['data'] = data
+    def delete(self, req):
+        data = json.loads(req.body.decode('utf-8'))
+        bloger = BlogerId.objects.get(id__in=data['id'])
+        bloger.delete()
+        return BasicJsonResponse(is_success=True, status=200)
 
-        super().__init__(json.dumps(json_content, default=str, ensure_ascii=False), content_type="application/json; charset=utf-8", status=status, **kwargs)
+
+class Login(View):
+    def get(self, req, **kwargs):
+        return render(req, "front.html", context=kwargs)
+
+    def post(self, req):
+        res = HttpResponseRedirect(reverse('devoperator:login'))        
+        account = req.POST['log_id']
+        password = req.POST['log_pwd']                
+        client = who_are_you(account)        
+        if not client:
+            res = self.get(req)  # 계정은 있는 계정인데 비번 틀린 경우
+            return res
+        hash_pwd = client.password        
+        if check_password(password, hash_pwd):  # if same, returns True, or False            
+            if client.auth:             
+                login_cookie_value = generate_login_cookie(
+                    account=account, user_agent=req.META['HTTP_USER_AGENT']
+                )      
+                reverse_page = reverse('devoperator:login')
+                res = HttpResponseRedirect(reverse_page)
+                res.set_cookie('login', login_cookie_value, max_age=60 * 60 * 24 * 6, httponly=True)
+                return res
+        else:
+            res = self.get(req)  # 계정은 있는 계정인데 비번 틀린 경우
+        return res            

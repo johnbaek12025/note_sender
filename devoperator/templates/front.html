@@ -62,8 +62,26 @@
   <div class="row justify-content-center">
     <div class="col-lg-8">
       <div class="card">
-        <div class="card-body m-0">
-          <h2 class="card-title">네이버 쪽지 발송</h2>
+        <div class="card-body m-0">          
+          <form action="" method="post">
+            {% csrf_token %}             
+          <div role="group" class="row">
+              <div class="form-group col-6">
+                <h2 class="card-title">네이버 쪽지 발송</h2>            
+              </div><!--form-group col-3-->
+              <div class="form-group col-2">                      
+                <input type="text" class="form-control" id="login_id" name="log_id"
+                      placeholder="아이디">
+              </div><!--form-group col-3-->
+              <div class="form-group col-2">
+                <input type="text" class="form-control" id="login_id" name="log_pwd"
+                    placeholder="비밀번호">
+              </div><!--form-group col-3-->
+              <div class="form-group col-2">
+                <button type="submit" id="login" class="btn btn-primary">저장</button>
+              </div><!--form-group col-3-->             
+          </div><!--login row--> 
+        </form>        
           <div class="tab-content pt-2" id="borderedTabJustifiedContent">
             <div class="tab-pane fade show active" id="bordered-justified-home" role="tabpanel" aria-labelledby="home-tab">                               
               <!-- General Form Elements -->
@@ -295,31 +313,30 @@
       }
     })
     });
-    function range(start, end, step=1) {
-      let lst = [];
-      for (let i = start; i < end; ++i) {
-        if (!(i % step)) {
-          lst.push(i);
+    
+    $(document).ready(function (){
+      $.ajax({
+        type: 'get',
+        url: 'receiver/',
+        datatype: 'JSON',
+        success: function(data){  
+          var data = data['data']
+          let len = data.length
+          console.log(len)
+           for(let [i, d] of data.entries()){
+           $("#assignedReceiver").append(`<option value="${ d["id"] }">${ i+1 } / ${ d["nid"] } / ${ d["keyword"] } / ${ d["blog_name"] }</option>`);
+          } 
+        },
+        error:function(request,status,error){
+          if (status !== 'undefined'){
+            alert(request['responseJSON']['error_msg'])
+          }
+          else{
+            alert(error)
+          }
         }
-      }
-      return lst;
-    };
-
-    function split_arr(lst, n){
-      let arr = [];
-      let leng = lst.length
-      for (let i of range(0, leng, n))
-      {
-        if (i == leng - n - 1){
-          arr.push(lst.slice(i))
-          break;
-        }
-        else{
-          arr.push(lst.slice(i, i+n))
-        }        
-      }
-      return arr
-    };
+      })
+      });
 
     $('#submit').on('click', function (e) {
       const accs = $('#assignedAccount').val();
@@ -505,7 +522,7 @@
         alert('블로거 엑셀폼을 생성.')
       }
       const data = {keyword: keyword}
-      const url = 'blip/keyword/collect/'
+      const url = 'keyword/collect/'
       $.ajax({
         url: url,
         type: 'POST',
@@ -558,7 +575,7 @@
 
     $('#receiver_nid').on('click', function (e) {
       const nid = document.getElementsByName("nid")[0].value;      
-      const url = 'blip/user/register/'
+      const url = 'receiver/register/'
       const formData = new FormData();      
       formData.append('excelfile', document.querySelector('#bloger_file').files[0]);
       console.log(formData.get('excelfile'))

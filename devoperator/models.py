@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils.timezone import now
 
 
 class NaverAccounts(models.Model):
@@ -38,11 +39,36 @@ class Message(models.Model):
     birth = models.DateTimeField(auto_now_add=True)
 
 
-class Transition(models.Model):
-    msg = models.CharField(max_length=200)
-    birth = models.DateTimeField(auto_now_add=True)
-
-
 class Quote(models.Model):
     msg = models.TextField()
     birth = models.DateTimeField(auto_now_add=True)
+
+
+class Account(models.Model):
+    birth = models.DateTimeField(auto_now_add=True)
+    nick = models.CharField(max_length=200)
+    account = models.CharField(max_length=200, unique=True, db_index=True)
+    password = models.CharField(max_length=200)
+    auth = models.BooleanField(default=True)
+
+
+class LoginSession(models.Model):
+
+    class Meta:
+        ordering = ['-birth']
+    birth = models.DateTimeField(default=now)
+    user_agent = models.TextField(null=True, default=None, blank=True)
+    value = models.CharField(max_length=200, db_index=True, unique=True)
+    account = models.CharField(max_length=200)
+    logged_out = models.BooleanField(default=False)
+    latest_accessed = models.DateTimeField(default=now)
+
+    def __init__(self, *args, **kwargs):
+
+        super().__init__(*args, **kwargs)
+        self.latest_accessed = now()
+        if getattr(self, 'pk', None) is not None:
+            self.save()
+
+    def __str__(self):
+        return self.account + ' - ' + self.value

@@ -1,27 +1,27 @@
-from django.urls import path
-
-from devoperator.views import AddMsg, AddQ, AddTrs, AssignAccounts, SendNote, check_account, download_account_excel, main_page
+from django.urls import path, include
+from django.contrib.auth import views as auth_views
+from devoperator.views.response import AddMsg, AddQ, AssignAccounts, BlogerId, CheckAccount, ExcelForm, SendNote, CheckAccount, Login
 
 app_name = 'devoperator'
 
-urlpatterns = [
-    path('', main_page),
+urlpatterns = [    
+    path('', Login.as_view(), name='login'),
     path('note/', SendNote.as_view()),
     path('log/', SendNote.as_view()),
     path('account/', AssignAccounts.as_view()),
-    path('account/excel/download', download_account_excel),
-    path('account/check/', check_account),
+    path('account/excel/download', ExcelForm.as_view()),
+    path('account/check/', CheckAccount.as_view()),
     path('account/register/', AssignAccounts.as_view()),
     path('account/delete/', AssignAccounts.as_view()),
     path('account/update/<int:id>/', AssignAccounts.as_view()),
+    path('keyword/collect/', BlogerId.as_view(), name='keyword'),
+    path('receiver/register/', BlogerId.as_view()),    
+    path('receiver/', BlogerId.as_view()),
+    path('delete/', BlogerId.as_view()),
     path('msg/', AddMsg.as_view()),
     path('msg/modify/', AddMsg.as_view()),
     path('msg/register/', AddMsg.as_view()),
     path('quote/', AddQ.as_view()),
     path('quote/modify/', AddQ.as_view()),
-    path('quote/register/', AddQ.as_view()),
-    path('transition/', AddTrs.as_view()),
-    path('transition/modify/', AddTrs.as_view()),
-    path('transition/register/', AddTrs.as_view()),
-    path('data/delete/', main_page)    
+    path('quote/register/', AddQ.as_view()),      
 ]
