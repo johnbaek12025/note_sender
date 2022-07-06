@@ -17,12 +17,13 @@ from datetime import datetime
 from .common import HttpResponseBase, BasicJsonResponse, ParsedClientView
 from xlsxwriter import Workbook
 from crawler.models import Bloger
-from devoperator.models import Ip, Message, NaverAccounts, NoteSendingLog, Quote
+from devoperator.models import Ip, LoginSession, Message, NaverAccounts, NoteSendingLog, Quote
 from http import cookiejar
 from urllib3.util.retry import Retry
 from requests.adapters import HTTPAdapter
 from requests.utils import requote_uri
 from devoperator.utility.utility import accumulator, file_handle, generate_login_cookie, who_are_you
+from django.contrib import messages
 from util.ip_util import switchIp2, get_myip
 from util.naver_note import Session
 from django.views.decorators.csrf import csrf_exempt
@@ -286,8 +287,12 @@ class BlogerId(ParsedClientView):
         return BasicJsonResponse(is_success=True, status=200)
 
 
-class Login(View):
+class Login(ParsedClientView):    
+    @ParsedClientView.init_parse
     def get(self, req, **kwargs):
+        print(self._client)   
+        if self._client:
+            kwargs = {'cid': self._client.account}
         return render(req, "front.html", context=kwargs)
 
     def post(self, req):
@@ -305,9 +310,28 @@ class Login(View):
                     account=account, user_agent=req.META['HTTP_USER_AGENT']
                 )      
                 reverse_page = reverse('devoperator:login')
+                messages.success(req, "success")
                 res = HttpResponseRedirect(reverse_page)
                 res.set_cookie('login', login_cookie_value, max_age=60 * 60 * 24 * 6, httponly=True)
                 return res
         else:
             res = self.get(req)  # 계정은 있는 계정인데 비번 틀린 경우
-        return res            
+        return res     
+        
+class Logout(View):
+
+    @transaction.atomic
+    def get(self, req):
+
+        # res = BaseJsonFormat()
+        # res = HttpResponse(res, content_type="application/json")
+        res = HttpResponseRedirect(reverse('devoperator:login'))
+
+        cookie_value = req.COOKIES.get('login', None)
+        if cookie_value:
+            login_session = LoginSession.objects.get(value=cookie_value)
+            login_session.logged_out = True
+            login_session.save()
+            res.delete_cookie('login')
+
+        return res

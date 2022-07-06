@@ -4,7 +4,7 @@ from devoperator.views.response import AddMsg, AddQ, AssignAccounts, BlogerId, C
 
 app_name = 'devoperator'
 
-urlpatterns = [    
+urlpatterns = [
     path('', Login.as_view(), name='login'),
     path('note/', SendNote.as_view()),
     path('log/', SendNote.as_view()),
