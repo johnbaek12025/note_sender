@@ -95,7 +95,7 @@ class ParsedClientView(View):
     @property
     def client(self):
         if self._client is None:
-            raise NotParsedError
+            return None
         return self._client
 
 

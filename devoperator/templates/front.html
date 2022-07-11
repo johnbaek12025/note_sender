@@ -62,27 +62,36 @@
   <div class="row justify-content-center">
     <div class="col-lg-8">
       <div class="card">
-        <div class="card-body m-0">                   
-          {%if not cid%}
+        <div class="card-body m-0">          
+          {%if not request.COOKIES.login%}
           <form action="" method="post">
             {% csrf_token %}             
-          <div role="group" class="row">
+            <div role="group" class="row">
               <div class="form-group col-6">                
-                <h2 class="card-title">{{account}}네이버 쪽지 발송</h2>                
+                <h2 class="card-title">네이버 쪽지 발송</h2>                
               </div><!--form-group col-3-->
               <div class="form-group col-2">                      
-                <input type="text" class="form-control" id="login_id" name="log_id"
-                      placeholder="아이디">
+                <h2 class="card-title"><input type="text" class="form-control" id="login_id" name="log_id"
+                      placeholder="아이디"></h2>
               </div><!--form-group col-3-->
               <div class="form-group col-2">
-                <input type="text" class="form-control" id="login_id" name="log_pwd"
-                    placeholder="비밀번호">
+                <h2 class="card-title"><input type="text" class="form-control" id="login_id" name="log_pwd"
+                    placeholder="비밀번호"></h2>
               </div><!--form-group col-3-->
               <div class="form-group col-2">
-                <button type="submit" id="login" class="btn btn-primary">저장</button>
+                <h2 class="card-title"><button type="submit" id="login" class="btn btn-primary">저장</button></h2>
               </div><!--form-group col-3-->             
           </div><!--login row--> 
-        </form>        
+        </form>                
+        {%else%}         
+        <div role="group" class="row">
+          <div class="form-group col-6">                
+            <h2 class="card-title">네이버 쪽지 발송</h2>
+          </div><!--form-group col-3-->
+          <div class="form-group col-2">                      
+            <h2 class="card-title"><a href="logout/">Logout</a></h2>
+          </div><!--form-group col-3--> 
+        </div><!--login row-->         
         {% endif %}
           <div class="tab-content pt-2" id="borderedTabJustifiedContent">
             <div class="tab-pane fade show active" id="bordered-justified-home" role="tabpanel" aria-labelledby="home-tab">                               
@@ -339,7 +348,8 @@
         }
       })
       });
-
+    
+    
     $('#submit').on('click', function (e) {
       const accs = $('#assignedAccount').val();
       const receivers = $('#assignedReceiver').val();

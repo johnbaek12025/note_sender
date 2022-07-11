@@ -1,11 +1,11 @@
 from django.urls import path, include
-from django.contrib.auth import views as auth_views
-from devoperator.views.response import AddMsg, AddQ, AssignAccounts, BlogerId, CheckAccount, ExcelForm, SendNote, CheckAccount, Login
+from devoperator.views.response import AddMsg, AddQ, AssignAccounts, BlogerId, CheckAccount, ExcelForm, Logout, SendNote, CheckAccount, Login
 
 app_name = 'devoperator'
 
 urlpatterns = [
     path('', Login.as_view(), name='login'),
+    path('logout/', Logout.as_view(), name='logout'),
     path('note/', SendNote.as_view()),
     path('log/', SendNote.as_view()),
     path('account/', AssignAccounts.as_view()),

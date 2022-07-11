@@ -287,15 +287,14 @@ class BlogerId(ParsedClientView):
         return BasicJsonResponse(is_success=True, status=200)
 
 
-class Login(ParsedClientView):    
-    @ParsedClientView.init_parse
-    def get(self, req, **kwargs):
-        print(self._client)   
-        if self._client:
-            kwargs = {'cid': self._client.account}
+class Login(ParsedClientView):        
+    def get(self, req, **kwargs):        
+        
+        # if client:
+        #     kwargs = {'cid': client.account}
         return render(req, "front.html", context=kwargs)
 
-    def post(self, req):
+    def post(self, req):        
         res = HttpResponseRedirect(reverse('devoperator:login'))        
         account = req.POST['log_id']
         password = req.POST['log_pwd']                
@@ -319,19 +318,15 @@ class Login(ParsedClientView):
         return res     
         
 class Logout(View):
-
     @transaction.atomic
-    def get(self, req):
-
+    def get(self, req):         
         # res = BaseJsonFormat()
         # res = HttpResponse(res, content_type="application/json")
         res = HttpResponseRedirect(reverse('devoperator:login'))
-
         cookie_value = req.COOKIES.get('login', None)
         if cookie_value:
             login_session = LoginSession.objects.get(value=cookie_value)
             login_session.logged_out = True
             login_session.save()
             res.delete_cookie('login')
-
         return res
