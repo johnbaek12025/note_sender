@@ -75,7 +75,7 @@
                       placeholder="아이디"></h2>
               </div><!--form-group col-3-->
               <div class="form-group col-2">
-                <h2 class="card-title"><input type="text" class="form-control" id="login_id" name="log_pwd"
+                <h2 class="card-title"><input type="password" class="form-control" id="login_id" name="log_pwd"
                     placeholder="비밀번호"></h2>
               </div><!--form-group col-3-->
               <div class="form-group col-2">
@@ -324,7 +324,77 @@
       }
     })
     });
-    
+    $(document).ready(function (){
+      $.ajax({
+        type: 'get',
+        url: 'quote/',
+        datatype: 'JSON',
+        success: function(data){  
+          var data = data['data']
+          let len = data.length
+           for(let [i, d] of data.entries()){                        
+           $("#assignedQuote").append(`<option value="${ d["id"] }">${ i+1 } / ${ d["msg"] }</option>`);
+          } 
+        },
+        error:function(request,status,error){
+          if (status !== 'undefined'){
+            alert(request['responseJSON']['error_msg'])
+          }
+          else{
+            alert(error)
+          }
+        }
+      })
+      });
+
+    $(document).ready(function (){
+      $.ajax({
+        type: 'get',
+        url: 'msg/',
+        datatype: 'JSON',
+        success: function(data){  
+          var data = data['data']
+          let len = data.length
+          console.log(len)
+           for(let [i, d] of data.entries()){            
+           $("#assignedMessage").append(`<option value="${ d["id"] }">${ i+1 } / ${ d["msg"] }</option>`);
+          } 
+        },
+        error:function(request,status,error){
+          if (status !== 'undefined'){
+            alert(request['responseJSON']['error_msg'])
+          }
+          else{
+            alert(error)
+          }
+        }
+      })
+      });
+
+    $(document).ready(function (){
+      $.ajax({
+        type: 'get',
+        url: 'account/',
+        datatype: 'JSON',
+        success: function(data){  
+          var data = data['data']
+          let len = data.length          
+           for(let [i, d] of data.entries()){            
+           $("#assignedAccount").append(`<option value="${ d["id"] }">${ i+1 } / ${ d["nid"] } / ${ d["npw"] }</option>`);
+          } 
+        },
+        error:function(request,status,error){
+          if (status !== 'undefined'){
+            alert(request['responseJSON']['error_msg'])
+          }
+          else{
+            alert(error)
+          }
+        }
+      })
+      });
+
+
     $(document).ready(function (){
       $.ajax({
         type: 'get',
@@ -400,7 +470,7 @@
       const msg = $('#assignedMessage').val();
       const quote = $('#assignedQuote').val();
       const data = {accs: accs, receivers: receivers, msg: msg, quote: quote}
-      const url = 'data/delete/'
+      const url = 'delete/'
       $.ajax({
         url: url,
         type: 'DELETE',
@@ -580,7 +650,7 @@
           alert('검증 완료')
         },
         error:function(request,status,error){                
-          alert(`검증 불가 ${request.responseJSON.error_msg}`)
+          console.log(`검증 불가 ${request.responseJSON}`)
         }
       });
     });

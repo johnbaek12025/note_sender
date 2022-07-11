@@ -39,7 +39,7 @@ class CheckAccount(ParsedClientView):
         data = json.loads(req.body.decode())                
         wtime = [i for i in range(2, 7)]                
         for id in data['ids']:
-            switchIp2()            
+            switchIp2()
             time.sleep(random.choice(wtime))            
             acc = NaverAccounts.objects.get(id=id)
             check = Session(acc.nid, acc.npw)
