@@ -282,8 +282,14 @@ class BlogerId(ParsedClientView):
 
     def delete(self, req):
         data = json.loads(req.body.decode('utf-8'))
-        bloger = BlogerId.objects.get(id__in=data['id'])
-        bloger.delete()
+        if data.get('accs'):
+            NaverAccounts.objects.filter(id__in=data['accs']).delete()
+        if data.get('receivers'):
+            BlogerId.objects.filter(id__in=data['receivers']).delete()
+        if data.get('msg'):
+            Message.objects.filter(id__in=data['msg']).delete()
+        if data.get('quote'):
+            Quote.objects.filter(id__in=data['quote']).delete()        
         return BasicJsonResponse(is_success=True, status=200)
 
 
@@ -308,8 +314,7 @@ class Login(ParsedClientView):
                 login_cookie_value = generate_login_cookie(
                     account=account, user_agent=req.META['HTTP_USER_AGENT']
                 )      
-                reverse_page = reverse('devoperator:login')
-                messages.success(req, "success")
+                reverse_page = reverse('devoperator:login')                
                 res = HttpResponseRedirect(reverse_page)
                 res.set_cookie('login', login_cookie_value, max_age=60 * 60 * 24 * 6, httponly=True)
                 return res
@@ -321,7 +326,7 @@ class Logout(View):
     @transaction.atomic
     def get(self, req):         
         # res = BaseJsonFormat()
-        # res = HttpResponse(res, content_type="application/json")
+        # res = HttpResponse(res, content_type="application/json")        
         res = HttpResponseRedirect(reverse('devoperator:login'))
         cookie_value = req.COOKIES.get('login', None)
         if cookie_value:

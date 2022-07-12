@@ -145,8 +145,8 @@ if __name__ == '__main__':
     wtime = numpy.arange(1, 3, 0.5)
     while True:
         session = requests.session()        
-        url = 'http://localhost:8000/blip/send/get/'
-        res = status_validation(url, session)
+        url = 'http://localhost:8000/blip/send/'
+        res = status_validation(f"{url}get/", session)
         data = res.get('data')
         if data:            
             ip = switchIp2()            
@@ -168,9 +168,8 @@ if __name__ == '__main__':
                     if detail['status'] == 'fail':
                         post_data['error_msg'] = detail['Message']
                     else:                        
-                        post_data['is_success'] = True
-                    url = 'http://localhost:8000/blip/send/post/'
-                    res = status_validation(url, session, post_data=json.dumps(post_data))
+                        post_data['is_success'] = True                    
+                    res = status_validation(f"{url}post/", session, post_data=json.dumps(post_data))
                     print(res)                   
             else:
                 for data_dict in data:
@@ -179,8 +178,7 @@ if __name__ == '__main__':
                     post_data["try_at_date"] = datetime.now().strftime('%Y-%m-%d')
                     post_data['receiver'] = data_dict['r_id']
                     post_data['msg'] = data_dict['msg']
-                    post_data['error_msg'] = check
-                    url = 'http://localhost:8000/blip/send/post/'
-                    res = status_validation(url, session, post_data=json.dumps(post_data))                    
+                    post_data['error_msg'] = check                    
+                    res = status_validation(f"{url}post/", session, post_data=json.dumps(post_data))                    
                     print(res)
         time.sleep(60)

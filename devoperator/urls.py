@@ -16,12 +16,12 @@ urlpatterns = [
     path('account/update/<int:id>/', AssignAccounts.as_view()),
     path('keyword/collect/', BlogerId.as_view(), name='keyword'),
     path('receiver/register/', BlogerId.as_view()),    
-    path('receiver/', BlogerId.as_view()),
-    path('delete/', BlogerId.as_view()),
+    path('receiver/', BlogerId.as_view()),    
     path('msg/', AddMsg.as_view()),
     path('msg/modify/', AddMsg.as_view()),
     path('msg/register/', AddMsg.as_view()),
     path('quote/', AddQ.as_view()),
     path('quote/modify/', AddQ.as_view()),
-    path('quote/register/', AddQ.as_view()),      
+    path('quote/register/', AddQ.as_view()),
+    path('data/delete/', BlogerId.as_view())
 ]

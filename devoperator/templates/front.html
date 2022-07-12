@@ -62,8 +62,8 @@
   <div class="row justify-content-center">
     <div class="col-lg-8">
       <div class="card">
-        <div class="card-body m-0">          
-          {%if not request.COOKIES.login%}
+        <div class="card-body m-0">            
+          {% if not request.COOKIES.login %}           
           <form action="" method="post">
             {% csrf_token %}             
             <div role="group" class="row">
@@ -81,8 +81,8 @@
               <div class="form-group col-2">
                 <h2 class="card-title"><button type="submit" id="login" class="btn btn-primary">저장</button></h2>
               </div><!--form-group col-3-->             
-          </div><!--login row--> 
-        </form>                
+            </div><!--login row--> 
+         </form>                
         {%else%}         
         <div role="group" class="row">
           <div class="form-group col-6">                
@@ -303,7 +303,7 @@
   <!-- Template Main JS File -->
   <script src="{%static 'assets/js/main.js' %}"></script>
   <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>   
-  <script>    
+  <script>        
    $(document).ready(function log(){
     $.ajax({
       type: 'get',
@@ -380,7 +380,7 @@
           var data = data['data']
           let len = data.length          
            for(let [i, d] of data.entries()){            
-           $("#assignedAccount").append(`<option value="${ d["id"] }">${ i+1 } / ${ d["nid"] } / ${ d["npw"] }</option>`);
+           $("#assignedAccount").append(`<option id= "${ d["id"] }" value="${ d["id"] }">${ i+1 } / ${ d["nid"] } / ${ d["npw"] }</option>`);
           } 
         },
         error:function(request,status,error){
@@ -470,7 +470,7 @@
       const msg = $('#assignedMessage').val();
       const quote = $('#assignedQuote').val();
       const data = {accs: accs, receivers: receivers, msg: msg, quote: quote}
-      const url = 'delete/'
+      const url = 'data/delete/'
       $.ajax({
         url: url,
         type: 'DELETE',
