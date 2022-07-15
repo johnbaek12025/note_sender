@@ -1,3 +1,6 @@
+from celery import Task
+from celery import shared_task
+from celery.utils.log import get_task_logger
 from datetime import datetime
 from http import cookiejar
 import json
@@ -7,6 +10,8 @@ from tabnanny import check
 import time
 import uuid
 from django.dispatch import receiver
+from devoperator.models import Ip, NaverAccounts, NoteSendingLog
+from crawler.models import Bloger
 import numpy
 import requests
 import rsa
@@ -14,8 +19,71 @@ import lzstring
 from urllib3.util.retry import Retry
 from requests.adapters import HTTPAdapter
 from requests.utils import requote_uri
-from util.ip_util import switchIp2
+from util.ip_util import get_myip, switchIp2
 
+
+
+logger = get_task_logger(__name__)
+def current_ip(tether=True):
+    ip = get_myip()
+    if tether:
+        ip = switchIp2()
+    try:
+        get_ip = Ip.objects.get(address=ip)
+    except Ip.DoesNotExist:
+        Ip(address=ip).save()
+        get_ip = Ip.objects.get(address=ip)
+    return get_ip
+
+
+@shared_task(name='login')
+def run(**kwargs):
+    wtime = numpy.arange(1, 3, 0.5)
+    uid = kwargs.get('uid')
+    upw = kwargs.get('upw')
+    msg = kwargs.get('msg')
+    receivers = kwargs.get('receivers')    
+    acc_inst = NaverAccounts.objects.get(nid=uid)
+    s = Session(uid, upw)
+    check = s.check_account()    
+    if isinstance(check, int):        
+        for r in receivers:
+            ip_inst = current_ip()
+            time.sleep(random.choice(wtime))
+            res = s.sending(msg, r)
+            detail = json.loads(res.content.decode())            
+            log_data = {
+                "try_at": datetime.now().strftime('%Y-%m-%d, %H:%M:%S'),
+                "try_at_date": datetime.now().strftime('%Y-%m-%d'),
+                "receiver": Bloger.objects.get(nid=r),
+                "msg": msg,
+                "account": acc_inst,
+                "ip": ip_inst,
+            }            
+            if 'Result' in detail:
+                log_data['error_msg'] = detail['Message']
+            elif 'status' in detail:
+                log_data['error_msg'] = detail['Message']
+            else:                        
+                log_data['is_success'] = True
+            try:
+                print(log_data)
+                log = NoteSendingLog(**log_data)
+                log.save()
+            except:
+                print('error')
+                continue
+        
+    else:
+        log_data = {
+                        "account": acc_inst,
+                        "try_at": datetime.now().strftime('%Y-%m-%d, %H:%M:%S'),
+                        "try_at_date": datetime.now().strftime('%Y-%m-%d'),
+                        'receiver': random.choice(receivers),
+                        'msg': msg,
+                        'error_msg': check,
+                    }
+    
 
 class NaverLogin:
     def __init__(self, uid, upw) -> None:
@@ -122,62 +190,6 @@ class Session(NaverLogin):
             res = session.post(self.url, data=data, headers={'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'})
         return res
 
-def status_validation(url, session, post_data=None):
-    time.sleep(random.choice(wtime))
-    if not post_data:            
-        res = session.get(url)            
-    else:
-        res = session.post(url, data=post_data)
-    status = res.status_code
-    if status == 200:            
-        try:                
-            return res.json()
-        except:
-            if "error" in res.text:
-                return None
-            return res.text
-    else:
-        return None
 
 
-
-if __name__ == '__main__':
-    wtime = numpy.arange(1, 3, 0.5)
-    while True:
-        session = requests.session()        
-        url = 'http://localhost:8000/blip/send/'
-        res = status_validation(f"{url}get/", session)
-        data = res.get('data')
-        if data:            
-            ip = switchIp2()            
-            acc_id = data[0]['acc_id']
-            acc_pw = data[0]['acc_pw']
-            s = Session(acc_id, acc_pw)
-            check = s.check_account()            
-            post_data = {}
-            if isinstance(check, int):                
-                for data_dict in data:                    
-                    time.sleep(random.choice(wtime))                    
-                    post_data['ip'] = ip
-                    res = s.sending(data_dict['msg'], data_dict['r_id'])
-                    detail = json.loads(res.content.decode())
-                    post_data["try_at"] = datetime.now().strftime('%Y-%m-%d, %H:%M:%S')
-                    post_data["try_at_date"] = datetime.now().strftime('%Y-%m-%d')
-                    post_data['receiver'] = data_dict['r_id']
-                    post_data['msg'] = data_dict['msg']                    
-                    if detail['status'] == 'fail':
-                        post_data['error_msg'] = detail['Message']
-                    else:                        
-                        post_data['is_success'] = True                    
-                    res = status_validation(f"{url}post/", session, post_data=json.dumps(post_data))
-                    print(res)                   
-            else:
-                for data_dict in data:                    
-                    post_data["try_at"] = datetime.now().strftime('%Y-%m-%d, %H:%M:%S')
-                    post_data["try_at_date"] = datetime.now().strftime('%Y-%m-%d')
-                    post_data['receiver'] = data_dict['r_id']
-                    post_data['msg'] = data_dict['msg']
-                    post_data['error_msg'] = check                    
-                    res = status_validation(f"{url}post/", session, post_data=json.dumps(post_data))                    
-                    print(res)
-        time.sleep(60)
+    

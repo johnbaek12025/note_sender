@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'devoperator.apps.DevoperatorConfig',
     'crawler.apps.CrawlerConfig',
+    'django_celery_results',
 ]
 
 MIDDLEWARE = [
@@ -87,7 +88,7 @@ if DEBUG:
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR /'db.sqlite3',
+        'NAME': BASE_DIR /'db.sqlite3',        
     }
 }
 
@@ -140,3 +141,19 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'form')
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+BROKER_URL = 'pyamqp://localhost:5672'
+CELERY_TIMEZONE = 'Asia/Seoul'
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_TIME_LIMIT = 30 * 60
+CELERY_RESULT_BACKEND = 'django-db'
+CELERY_CACHE_BACKEND = 'django-cache'
+CELERY_CACHE_BACKEND = 'default'
+
+# django setting.
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+        'LOCATION': 'my_cache_table',
+    }
+}

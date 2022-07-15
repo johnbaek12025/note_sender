@@ -3,10 +3,12 @@ from multiprocessing import context
 import os
 from pathlib import Path
 import random
+from socket import timeout
 from sre_constants import SUCCESS
 import time
 from datetime import datetime
 import unicodedata
+from celery import current_app
 from django.dispatch import receiver
 from django.http import HttpResponse, HttpResponseRedirect
 from django.views import View
@@ -14,6 +16,8 @@ from django.db import DatabaseError, transaction
 from django.urls import reverse, resolve
 from django.shortcuts import render
 from datetime import datetime
+
+from devoperator.tasks import run
 from .common import HttpResponseBase, BasicJsonResponse, ParsedClientView
 from xlsxwriter import Workbook
 from crawler.models import Bloger
@@ -97,13 +101,20 @@ class SendNote(ParsedClientView):
         msgs = [f"{m['msg']}\n\n{q['msg']}" for m in msgs for q in quotes]        
         
         for acc_id in acc_ids:
-            acc_inst = NaverAccounts.objects.get(id=acc_id)            
-            bulk_list = [NoteSendingLog(receiver=r_inst, msg=random.choice(msgs), account=acc_inst) for r_inst in Bloger.objects.filter(id__in=receiver_ids)]                
-        try:
-            NoteSendingLog.objects.bulk_create(bulk_list)
-        except DatabaseError as e:
-            return BasicJsonResponse(is_success=False, status=503, error_msg=e)
-        return BasicJsonResponse(is_success=True, status=200)                
+            acc_inst = NaverAccounts.objects.get(id=acc_id)                       
+            send_dict = {
+                'uid': acc_inst.nid, 
+                'upw': acc_inst.npw,
+                'msg': random.choice(msgs),
+                'receivers': [r_inst.nid for r_inst in Bloger.objects.filter(id__in=receiver_ids)]
+            }
+            run.delay(**send_dict)
+            
+        # try:
+        #     NoteSendingLog.objects.bulk_create(bulk_list)
+        # except DatabaseError as e:
+        #     return BasicJsonResponse(is_success=False, status=503, error_msg=e)
+        # return BasicJsonResponse(is_success=True, status=200)                
     
     def log_gen(self, log_qs):
             for l in log_qs:
