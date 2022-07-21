@@ -1,0 +1,13 @@
+{
+                "default": {
+                            "ENGINE": "django.db.backends.mysql", 
+                            "NAME": "mydb", 
+                            "USER": "jllab001", 
+                            "PASSWORD": "jllab1122",                             
+                            "HOST": "127.0.0.1",
+                            "PORT": "7001", 
+                            "OPTIONS": {"charset": "utf8mb4"}
+                            }
+            }
+
+            

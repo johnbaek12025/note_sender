@@ -47,7 +47,7 @@ class CheckAccount(ParsedClientView):
             time.sleep(random.choice(wtime))            
             acc = NaverAccounts.objects.get(id=id)
             check = Session(acc.nid, acc.npw)
-            res = check.check_account()            
+            res = check.check_account()
             if isinstance(res, str):
                 return BasicJsonResponse(data={'id': id, "result": 'X'})
             else:
@@ -55,10 +55,11 @@ class CheckAccount(ParsedClientView):
 
 class ExcelForm(ParsedClientView):
     @ParsedClientView.init_parse
-    def get(self, req):                 
+    def get(self, req):          
         today = datetime.now().strftime('%Y%m%d')
-        path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        create_dir(f"{path}\\form")
+        path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        print(path)
+        create_dir(f"{path}/form")
         file_name = f"네이버_계정_형식_{today}.xlsx"
         wb = Workbook(f"{path}/form/{file_name}")
         ordered_list = ['아이디', '비밀번호']
@@ -108,6 +109,7 @@ class SendNote(ParsedClientView):
                 'msg': random.choice(msgs),
                 'receivers': [r_inst.nid for r_inst in Bloger.objects.filter(id__in=receiver_ids)]
             }
+            print(send_dict)
             run.delay(**send_dict)
             
         # try:
@@ -262,7 +264,7 @@ class BlogerId(ParsedClientView):
                 bulk_list = []
                 for i in nums:            
                     blogs.extend(accumulator(keyword, i))        
-                path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+                path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) 
                 create_dir(f"{path}\\form")
                 file_name = f"blog_{keyword}_{today}.xlsx"
                 wb = Workbook(f"{path}/form/{file_name}")
@@ -339,9 +341,9 @@ class Logout(View):
         # res = BaseJsonFormat()
         # res = HttpResponse(res, content_type="application/json")        
         res = HttpResponseRedirect(reverse('devoperator:login'))
-        cookie_value = req.COOKIES.get('login', None)
+        cookie_value = req.COOKIES.get('login', None)        
         if cookie_value:
-            login_session = LoginSession.objects.get(value=cookie_value)
+            login_session = LoginSession.objects.get(value=cookie_value)            
             login_session.logged_out = True
             login_session.save()
             res.delete_cookie('login')

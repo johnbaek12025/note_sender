@@ -1,0 +1,14 @@
+FROM python:3.7.1
+
+ENV PYTHONUNBUFFERED 1
+ENV AM_I_IN_A_DOCKER_CONTAINER Yes
+
+RUN mkdir -p /django/salescaller
+# requirements.txt is not in this directory but in the parent directory. So you should set docker context the parent directory in docker-compose.yml or docker command
+COPY requirements.txt /django/salescaller/requirements.txt
+
+WORKDIR /django/salescaller
+
+RUN pip3 install --upgrade pip
+RUN pip3 install -r requirements.txt
+RUN pip3 install django-silk

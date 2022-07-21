@@ -1,0 +1,2 @@
+docker-compose --file=docker-compose-debug.yml up --build
+celery -A reputation worker --pool=solo -l info

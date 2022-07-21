@@ -6,8 +6,7 @@ from django.conf import settings
 
 # set the default Django settings module for the 'celery' program.
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'reputation.settings')
-app = Celery('reputation')
-
+app = Celery('reputation', broker="amqp://jllab001:jllab1122@localhost//")
 # Using a string here means the worker will not have to
 # pickle the object when using Windows.
 app.config_from_object('django.conf:settings')

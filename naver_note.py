@@ -142,42 +142,43 @@ def status_validation(url, session, post_data=None):
 
 
 if __name__ == '__main__':
-    wtime = numpy.arange(1, 3, 0.5)
-    while True:
-        session = requests.session()        
-        url = 'http://localhost:8000/blip/send/'
-        res = status_validation(f"{url}get/", session)
-        data = res.get('data')
-        if data:            
-            ip = switchIp2()            
-            acc_id = data[0]['acc_id']
-            acc_pw = data[0]['acc_pw']
-            s = Session(acc_id, acc_pw)
-            check = s.check_account()            
-            post_data = {}
-            if isinstance(check, int):                
-                for data_dict in data:                    
-                    time.sleep(random.choice(wtime))                    
-                    post_data['ip'] = ip
-                    res = s.sending(data_dict['msg'], data_dict['r_id'])
-                    detail = json.loads(res.content.decode())
-                    post_data["try_at"] = datetime.now().strftime('%Y-%m-%d, %H:%M:%S')
-                    post_data["try_at_date"] = datetime.now().strftime('%Y-%m-%d')
-                    post_data['receiver'] = data_dict['r_id']
-                    post_data['msg'] = data_dict['msg']                    
-                    if detail['status'] == 'fail':
-                        post_data['error_msg'] = detail['Message']
-                    else:                        
-                        post_data['is_success'] = True                    
-                    res = status_validation(f"{url}post/", session, post_data=json.dumps(post_data))
-                    print(res)                   
-            else:
-                for data_dict in data:                    
-                    post_data["try_at"] = datetime.now().strftime('%Y-%m-%d, %H:%M:%S')
-                    post_data["try_at_date"] = datetime.now().strftime('%Y-%m-%d')
-                    post_data['receiver'] = data_dict['r_id']
-                    post_data['msg'] = data_dict['msg']
-                    post_data['error_msg'] = check                    
-                    res = status_validation(f"{url}post/", session, post_data=json.dumps(post_data))                    
-                    print(res)
-        time.sleep(60)
+    pass
+    # wtime = numpy.arange(1, 3, 0.5)
+    # while True:
+    #     session = requests.session()        
+    #     url = 'http://localhost:8000/blip/send/'
+    #     res = status_validation(f"{url}get/", session)
+    #     data = res.get('data')
+    #     if data:            
+    #         ip = switchIp2()            
+    #         acc_id = data[0]['acc_id']
+    #         acc_pw = data[0]['acc_pw']
+    #         s = Session(acc_id, acc_pw)
+    #         check = s.check_account()            
+    #         post_data = {}
+    #         if isinstance(check, int):                
+    #             for data_dict in data:                    
+    #                 time.sleep(random.choice(wtime))
+    #                 post_data['ip'] = ip
+    #                 res = s.sending(data_dict['msg'], data_dict['r_id'])
+    #                 detail = json.loads(res.content.decode())
+    #                 post_data["try_at"] = datetime.now().strftime('%Y-%m-%d, %H:%M:%S')
+    #                 post_data["try_at_date"] = datetime.now().strftime('%Y-%m-%d')
+    #                 post_data['receiver'] = data_dict['r_id']
+    #                 post_data['msg'] = data_dict['msg']                    
+    #                 if detail['status'] == 'fail':
+    #                     post_data['error_msg'] = detail['Message']
+    #                 else:                        
+    #                     post_data['is_success'] = True                    
+    #                 res = status_validation(f"{url}post/", session, post_data=json.dumps(post_data))
+    #                 print(res)                   
+    #         else:
+    #             for data_dict in data:                    
+    #                 post_data["try_at"] = datetime.now().strftime('%Y-%m-%d, %H:%M:%S')
+    #                 post_data["try_at_date"] = datetime.now().strftime('%Y-%m-%d')
+    #                 post_data['receiver'] = data_dict['r_id']
+    #                 post_data['msg'] = data_dict['msg']
+    #                 post_data['error_msg'] = check                    
+    #                 res = status_validation(f"{url}post/", session, post_data=json.dumps(post_data))                    
+    #                 print(res)
+    #     time.sleep(60)

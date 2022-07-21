@@ -63,7 +63,7 @@
     <div class="col-lg-8">
       <div class="card">
         <div class="card-body m-0">            
-          {% if not request.COOKIES.login %}           
+          {% if not request.COOKIES.login %}
           <form action="" method="post">
             {% csrf_token %}             
             <div role="group" class="row">
@@ -650,7 +650,7 @@
           alert('검증 완료')
         },
         error:function(request,status,error){                
-          console.log(`검증 불가 ${request.responseJSON}`)
+          alert(`검증 불가 테더링 연결 확인해주세요~~!!`)
         }
       });
     });

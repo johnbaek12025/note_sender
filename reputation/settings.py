@@ -10,8 +10,11 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 
+from gc import get_debug
 import os
 from pathlib import Path
+
+from util.setting import get_bring_data
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -20,12 +23,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-tr(i#+oq&h&^u9sxth64e_0mvurp0d1j^lai!tflv5r*7(4cl-'
+SECRET_KEY = get_bring_data('secret_key')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = get_bring_data('debug') or False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = get_bring_data('allowed_hosts')
+
 
 
 # Application definition
@@ -39,7 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'devoperator.apps.DevoperatorConfig',
     'crawler.apps.CrawlerConfig',
-    'django_celery_results',
+    'django_celery_results',    
 ]
 
 MIDDLEWARE = [
@@ -72,26 +76,27 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'reputation.wsgi.application'
 
-if DEBUG:
-    INSTALLED_APPS.append('silk')
-    MIDDLEWARE.insert(0, 'silk.middleware.SilkyMiddleware')
-    SILKY_META = True
-    # 위 세줄을 주석처리해놓으면 편함
+# if DEBUG:
+#     INSTALLED_APPS.append('silk')
+#     MIDDLEWARE.insert(0, 'silk.middleware.SilkyMiddleware')
+#     # SILKY_META = True
+#     # 위 세줄을 주석처리해놓으면 편함
 
-    SILKY_PYTHON_PROFILER = True
-    SILKY_PYTHON_PROFILER_BINARY = True
-    SILKY_PYTHON_PROFILER_RESULT_PATH = os.path.abspath(os.path.join(BASE_DIR, 'log', 'profiler-result'))
-    os.makedirs(SILKY_PYTHON_PROFILER_RESULT_PATH, exist_ok=True)
+#     SILKY_PYTHON_PROFILER = True
+#     SILKY_PYTHON_PROFILER_BINARY = True
+#     SILKY_PYTHON_PROFILER_RESULT_PATH = os.path.abspath(os.path.join(BASE_DIR, 'log', 'profiler-result'))
+#     os.makedirs(SILKY_PYTHON_PROFILER_RESULT_PATH, exist_ok=True)
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR /'db.sqlite3',        
-    }
-}
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR /'db.sqlite3',        
+#     }
+# }
 
+DATABASES = get_bring_data('database')
 
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
@@ -142,18 +147,13 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'form')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-BROKER_URL = 'pyamqp://localhost:5672'
+
 CELERY_TIMEZONE = 'Asia/Seoul'
-CELERY_TASK_TRACK_STARTED = True
-CELERY_TASK_TIME_LIMIT = 30 * 60
-CELERY_RESULT_BACKEND = 'django-db'
-CELERY_CACHE_BACKEND = 'django-cache'
-CELERY_CACHE_BACKEND = 'default'
+CELERY_BROKER_URL = get_bring_data('broker')
+CELERY_TASK_TRACK_STARTED = get_bring_data('celery_task_track_started')
+CELERY_TASK_TIME_LIMIT = get_bring_data('celery_task_time_limit')
+CELERY_RESULT_BACKEND = get_bring_data('django_celery_backend')
+CELERY_CACHE_BACKEND = get_bring_data('django_cache')
 
 # django setting.
-CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
-        'LOCATION': 'my_cache_table',
-    }
-}
+CACHES = get_bring_data('django_celery_cache')
