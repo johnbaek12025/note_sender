@@ -1,0 +1,206 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+  <title>LJ Bank Search</title>
+  <meta content="" name="description">
+  <meta content="" name="keywords">
+
+  <!-- Favicons -->
+  <link href="{% static 'assets/img/favicon.png'%}" rel="icon">
+  <link href="{% static 'assets/img/apple-touch-icon.png'%}" rel="apple-touch-icon">
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.gstatic.com" rel="preconnect">
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
+
+  <!-- Vendor CSS Files -->
+  <link href="{% static 'assets/vendor/bootstrap/css/bootstrap.min.css'%}" rel="stylesheet">
+  <link href="{% static 'assets/vendor/bootstrap-icons/bootstrap-icons.css'%}" rel="stylesheet">
+  <link href="{% static 'assets/vendor/boxicons/css/boxicons.min.css'%}" rel="stylesheet">
+  <link href="{% static 'assets/vendor/quill/quill.snow.css'%}" rel="stylesheet">
+  <link href="{% static 'assets/vendor/quill/quill.bubble.css'%}" rel="stylesheet">
+  <link href="{% static 'assets/vendor/remixicon/remixicon.css'%}" rel="stylesheet">
+  <link href="{% static 'assets/vendor/simple-datatables/style.css'%}" rel="stylesheet">
+
+  <!-- Template Main CSS File -->
+  <link href="{% static 'assets/css/style.css' %}" rel="stylesheet">
+
+  <!-- =======================================================
+  * Template Name: NiceAdmin - v2.2.2
+  * Template URL: https://bootstrapmade.com/nice-admin-bootstrap-admin-html-template/
+  * Author: BootstrapMade.com
+  * License: https://bootstrapmade.com/license/
+  ======================================================== -->
+</head>
+
+<body>
+
+  <!-- ======= Header ======= -->
+  <header id="header" class="header fixed-top d-flex align-items-center">
+
+    <div class="d-flex align-items-center justify-content-between">
+      <a href="{% url 'home' %}" class="logo d-flex align-items-center">
+        <img src="{% static 'assets/img/logo.png' %}" alt="">
+        <span class="d-none d-lg-block">LJ Bank Search</span>
+      </a>
+
+    </div><!-- End Logo -->
+
+
+
+  </header><!-- End Header -->
+
+  <!-- ======= Sidebar ======= -->
+
+  <main id="main" class="main m-0">
+
+    <div>
+      <span></span>
+    </div>
+    <section class="section mt-lg-5 mt-5">
+      <div class="row justify-content-center">
+
+        <div class="col-lg-6">
+
+          <div class="card">
+            <div class="card-body m-0">
+              <h5 class="card-title">입금 내역 조회</h5>
+
+              <!-- Bordered Tabs Justified -->
+              <ul class="nav nav-tabs nav-tabs-bordered d-flex" id="borderedTabJustified" role="tablist">
+                <li class="nav-item flex-fill" role="presentation">
+                  <button class="nav-link w-100 active" id="home-tab" data-bs-toggle="tab" data-bs-target="#bordered-justified-home" type="button" role="tab" aria-controls="home" aria-selected="true">입금정보 조회</button>
+                </li>
+                <li class="nav-item flex-fill" role="presentation">
+                  <button class="nav-link w-100" id="profile-tab" data-bs-toggle="tab" data-bs-target="#bordered-justified-profile" type="button" role="tab" aria-controls="profile" aria-selected="false">일렬번호 조회</button>
+                </li>
+
+              </ul>
+              <div class="tab-content pt-2" id="borderedTabJustifiedContent">
+                <div class="tab-pane fade show active" id="bordered-justified-home" role="tabpanel" aria-labelledby="home-tab">
+
+
+              <!-- General Form Elements -->
+              <form>
+
+                <fieldset class="row mb-3  mt-lg-3">
+                  <legend class="col-form-label col-sm-2 pt-0">은행</legend>
+                  <div class="col-sm-10">
+                    <div class="form-check">
+                      <input class="form-check-input" type="radio" name="bank" id="kakaobank" value="option1" checked>
+                      <label class="form-check-label" for="kakaobank">
+                        카카오뱅크
+                      </label>
+                    </div>
+                    <div class="form-check">
+                      <input class="form-check-input" type="radio" name="bank" id="nh" value="option2">
+                      <label class="form-check-label" for="nh">
+                        농협
+                      </label>
+                    </div>
+                  </div>
+                </fieldset>
+
+                <div class="row mb-3">
+                  <label for="name" class="col-sm-2 col-form-label">성함</label>
+                  <div class="col-sm-10">
+                    <input type="text" id="name" class="form-control">
+                  </div>
+                </div>
+
+                <div class="row mb-3">
+                  <label for="amount" class="col-sm-2 col-form-label">금액(원)</label>
+                  <div class="col-sm-10">
+                    <input type="number" id="amount" class="form-control" step="10000">
+                  </div>
+                </div>
+                <div class="row mb-3">
+                  <label for="depositDate" class="col-sm-2 col-form-label">입금일자</label>
+                  <div class="col-sm-10">
+                    <input type="date" id="depositDate" class="form-control">
+                  </div>
+                </div>
+
+
+                <div class="row mb-3">
+                  <label class="col-sm-2 col-form-label"></label>
+                  <div class="col-sm-10">
+                    <button type="submit" id="submit" class="btn btn-primary">조회</button>
+                  </div>
+                </div>
+
+              </form><!-- End General Form Elements -->
+                </div>
+                <div class="tab-pane fade" id="bordered-justified-profile" role="tabpanel" aria-labelledby="profile-tab">
+                  <!-- General Form Elements -->
+              <form>
+
+
+
+                <div class="row mb-3 mt-lg-3">
+                  <label for="serialNumber" class="col-sm-2 col-form-label">일렬번호</label>
+                  <div class="col-sm-10">
+                    <input type="text" id="serialNumber" class="form-control">
+                  </div>
+                </div>
+
+
+                <div class="row mb-3">
+                  <label class="col-sm-2 col-form-label"></label>
+                  <div class="col-sm-10">
+                    <button type="submit" class="btn btn-primary">조회</button>
+                  </div>
+                </div>
+
+
+              </form><!-- End General Form Elements -->
+                </div>
+
+
+              </div><!-- End Bordered Tabs Justified -->
+
+            </div>
+          </div>
+
+
+
+        </div>
+
+
+      </div>
+      <div class="row justify-content-center p-3">
+
+        
+
+      </div>
+    </section>
+
+  </main><!-- End #main -->
+
+  <!-- ======= Footer ======= -->
+
+
+  <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+  <!-- Vendor JS Files -->
+  <script src="{% static 'assets/vendor/apexcharts/apexcharts.min.js' %}"></script>
+  <script src="{% static 'assets/vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+  <script src="{% static 'assets/vendor/chart.js/chart.min.js' %}"></script>
+  <script src="{% static 'assets/vendor/echarts/echarts.min.js' %}"></script>
+  <script src="{% static 'assets/vendor/quill/quill.min.js' %}"></script>
+  <script src="{% static 'assets/vendor/simple-datatables/simple-datatables.js' %}"></script>
+  <script src="{% static 'assets/vendor/tinymce/tinymce.min.js' %}"></script>
+  <script src="{% static 'assets/vendor/php-email-form/validate.js' %}"></script>
+
+  <!-- Template Main JS File -->
+  <script src="{% static 'assets/js/main.js' %}"></script>
+
+</body>
+
+</html>
