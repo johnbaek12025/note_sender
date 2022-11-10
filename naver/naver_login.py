@@ -8,7 +8,7 @@ import random
 import uuid
 import lzstring
 from typing import List, Tuple, Dict, Set
-
+from decouple import config
 from ip_util import switchIp2
 
 class CheckingError(Exception):
@@ -107,7 +107,7 @@ class NaverLogin:
             'bvsd': bvsd
         }
         res = self.status_validation(self.login_url, self.session, post_data=post_data)
-        finalize_url = re.search(r'location\.replace\("([^"]+)"\)', res).group(1)
+        finalize_url = re.search(r'location\.replace\("([^"]+)"\)', res).group(1)        
         if 'help' in finalize_url:
             raise LoginError('login is failed')
         res = self.status_validation(finalize_url, self.session)        
@@ -152,6 +152,7 @@ class NoteSender(NaverLogin):
             raise CheckingError
         self._set_token()        
         res = self.status_validation(self.note_send_url, self.session, post_data=self.data)        
+        print(res)
         if res['Result'] == 'FAIL':
             print('Failed Sending')
         else:
@@ -160,8 +161,8 @@ class NoteSender(NaverLogin):
 
 
 if __name__=='__main__':
-    nid = ''
-    npw = ''
+    nid = config('nid')
+    npw = config('npw')
     # switchIp2()
     nl = NaverLogin(nid, npw)    
     session = nl.login()

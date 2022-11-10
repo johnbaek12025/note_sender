@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+  <title>LJ Note Sender</title>
+  <meta content="" name="description">
+  <meta content="" name="keywords">    
+  <!-- Favicons -->
+  <link href="{% static 'assets/img/favicon.png' %}" rel="icon">
+  <link href="{% static 'assets/img/apple-touch-icon.png' %}" rel="apple-touch-icon">
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.gstatic.com" rel="preconnect">
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
+
+  <!-- Vendor CSS Files -->
+  <link href="{% static 'assets/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/vendor/bootstrap-icons/bootstrap-icons.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/vendor/boxicons/css/boxicons.min.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/vendor/quill/quill.snow.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/vendor/quill/quill.bubble.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/vendor/remixicon/remixicon.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/vendor/simple-datatables/style.css' %}" rel="stylesheet">
+
+  <!-- Template Main CSS File -->
+  <link href="{% static 'assets/css/style.css' %}" rel="stylesheet">
+  
+
+  <!-- =======================================================
+  * Template Name: NiceAdmin - v2.2.2
+  * Template URL: https://bootstrapmade.com/nice-admin-bootstrap-admin-html-template/
+  * Author: BootstrapMade.com
+  * License: https://bootstrapmade.com/license/
+  ======================================================== -->
+</head>
+
+<body>
+
+  <!-- ======= Header ======= -->
+  <header id="header" class="header fixed-top d-flex align-items-center">
+
+    <div class="d-flex align-items-center justify-content-between">
+      <a href="index.html" class="logo d-flex align-items-center">
+        <img src="{% static 'assets/img/logo.png' %}" alt="">
+        <span class="d-none d-lg-block">LJ Note Sender</span>
+      </a>
+
+    </div><!-- End Logo -->
+
+
+
+  </header><!-- End Header -->
+
+  <!-- ======= Sidebar ======= -->
+
+<main id="main" class="main m-0">
+  <section class="section mt-lg-5 mt-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card">
+        <div class="card-body m-0">            
+          {% if not request.COOKIES.login %}
+          <form action="" method="post">
+            {% csrf_token %}             
+            <div role="group" class="row">
+              <div class="form-group col-6">                
+                <h2 class="card-title">네이버 쪽지 발송</h2>                
+              </div><!--form-group col-3-->
+              <div class="form-group col-2">                      
+                <h2 class="card-title"><input type="text" class="form-control" id="login_id" name="log_id"
+                      placeholder="아이디"></h2>
+              </div><!--form-group col-3-->
+              <div class="form-group col-2">
+                <h2 class="card-title"><input type="password" class="form-control" id="login_id" name="log_pwd"
+                    placeholder="비밀번호"></h2>
+              </div><!--form-group col-3-->
+              <div class="form-group col-2">
+                <h2 class="card-title"><button type="submit" id="login" class="btn btn-primary">저장</button></h2>
+              </div><!--form-group col-3-->             
+            </div><!--login row--> 
+         </form>                
+        {%else%}         
+        <div role="group" class="row">
+          <div class="form-group col-6">                
+            <h2 class="card-title">네이버 쪽지 발송</h2>
+          </div><!--form-group col-3-->
+          <div class="form-group col-2">                      
+            <h2 class="card-title"><a href="logout/">Logout</a></h2>
+          </div><!--form-group col-3--> 
+        </div><!--login row-->         
+        {% endif %}
+          <div class="tab-content pt-2" id="borderedTabJustifiedContent">
+            <div class="tab-pane fade show active" id="bordered-justified-home" role="tabpanel" aria-labelledby="home-tab">                               
+              <!-- General Form Elements -->
+              <form>
+                <!--발신자 row-->
+                <div role="group" class="row">
+                  <div class="form-group col-6">
+                    <label for="categorization"><h5>발송 계정 할당</h5></label>                    
+                    <div role="group" class="row">
+                      <div class="form-group col-3">
+                          <input type="text" class="form-control" id="acc_nid" name="acc_nid"
+                                 placeholder="아이디">
+                      </div><!--form-group col-3-->
+                      <div class="form-group col-3">                          
+                          <input type="text" class="form-control" id="acc_npw" name="acc_npw"
+                              placeholder="비밀번호">
+                      </div><!--form-group col-3-->    
+                      <div class="form-group col-2">
+                      <form id="excelForm" role="form" action="" method="post">
+                        {% csrf_token %}
+                        <label for="account_file", style=" padding: 6px 10px; background-color:#0D6EFD;border-radius: 4px;
+                        color: white;
+                        cursor: pointer;">
+                          파일
+                        </label>
+                        <input type="file" id="account_file" accept=".xlsx, .xls, .csv" style="display: none"/>
+                      </form>
+                      </div><!--form-group col-3-->                   
+                      <div class="form-group col-2">
+                        <button type="button" id="accoount_insert" class="btn btn-primary">저장</button>                        
+                      </div><!--form-group col-3-->                             
+                      </br></br>
+                      <div class="form-group col-12">
+                        <select id="assignedAccount" name="assignedAccount" class="select" multiple="multiple" data-placeholder=""
+                                style="width: 100%;">
+                          {% for id, nid, npw in account %}
+                          <option value="{{ id }}" id={{id}}>{{ forloop.counter }} / {{ nid }} / {{npw}}
+                          </option>
+                          {% endfor %}
+                        </select>
+                      </div><!--form-group col-8-->                      
+                      {% comment %} <div class="form-group col-8">                        
+                        <select class="form-control" id="tethering" name="tethering">
+                            <option value="true">테더링 O</option>                            
+                        </select>                        
+                      </div> {% endcomment %}
+                      <div class="form-group col-4">
+                        <button type="button" id="accoount_cetainty" class="btn btn-primary">아이디 검증</button>
+                      </div><!--form-group col-3-->
+                    <div class="form-group col-4">
+                      <p id="acc_form"></p>
+                    </div><!--form-group col-3-->
+                    </div><!--row-->                    
+                  </div><!--form-group col-5-->
+                  <div class="form-group col-6">
+                    <div>
+                    <label for="categorization"><h5>수신자</h5></label>
+                    </div>                    
+                    <div class="form-group col-12">
+                      <div role="group" class="row">
+                        <div class="form-group col-3">
+                          <input type="text" class="form-control" id="nid" name="nid"
+                                  placeholder="수신자">                          
+                        </div><!--form-group col-3-->
+                        <div class="form-group col-2">
+                          <form id="excelForm" role="form" action="" method="post">
+                            {% csrf_token %}
+                            <label for="bloger_file", style=" padding: 6px 10px; background-color:#0D6EFD;border-radius: 4px;
+                            color: white;
+                            cursor: pointer;">
+                              파일
+                            </label>
+                            <input type="file" id="bloger_file" accept=".xlsx, .xls, .csv" style="display: none"/>
+                          </form>
+                        </div><!--form-group col-3--> 
+                        <div class="form-group col-2">
+                          <button type="button" id="receiver_nid" class="btn btn-primary">저장</button>
+                        </div><!--form-group col-3-->
+                        <div class="form-group col-3">                          
+                          <input type="text" class="form-control" id="keyword" name="keyword"
+                              placeholder="키워드">                          
+                        </div><!--form-group col-3-->
+                        <div class="form-group col-2">
+                          <button type="button" id="collect" class="btn btn-primary">수집</button>
+                        </div><!--form-group col-3-->                        
+                        </br></br>
+                        <div class="form-group col-12">
+                          <select id="assignedReceiver" name="assignedReceiver" class="select" multiple="multiple" data-placeholder=""
+                                style="width: 100%;">
+                            {% for id, nid, keyword, blog_name in receiver %}
+                            <option value="{{ id }}">{{ forloop.counter }} / {{ nid }} / {{ keyword }} / {{ blog_name }}</option>
+                            {% endfor %}
+                          </select>
+                        </div><!--form-group col-12-->
+                        <div class="form-group col-4">
+                          <p id="bloger_form"></p>
+                        </div><!--form-group col-3-->
+                      </div><!--"row"-->
+                    </div><!--form-group col-12-->                    
+                  </div><!--form-group col-7-->
+                </div><!--row account-->
+                </br>
+                </br>                      
+                
+                <!--메세지 row-->
+                <div role="group" class="row">
+                  <div class="form-group col-10">
+                    <label for="categorization"><h4>메세지</h4></label>
+                    <select id="assignedMessage" name="assignedMessage" class="select" multiple="multiple" data-placeholder=""
+                            style="width: 100%;">
+                        {% for id, msg in message %}
+                        <option value="{{ id }}">{{ msg }}</option>
+                        {% endfor %}
+                    </select>                    
+                  </div><!--form-group col-10-->
+                  <div class="form-group col-10">
+                    </br>                
+                    <textarea name="msg" rows="3" cols="50" placeholder="추가할 메세지를 작성해주세요"></textarea>
+                  </div><!--form-group col-10-->
+                  <div class="form-group col-3">
+                    <button type="submit" id="msg_add" class="btn btn-primary">추가</button>
+                  </div><!--form-group col-3-->
+                </div><!--row msg-->
+                </br>            
+                </br>
+                <!--명언 row-->
+                <div role="group" class="row">
+                  <div class="form-group col-10">
+                    <label for="categorization"><h4>명언</h4></label>
+                    <select id="assignedQuote" name="assignedQuote" class="select" multiple="multiple" data-placeholder=""
+                            style="width: 100%;">
+                        {% for id, msg in quote %}
+                        <option value="{{ id }}">{{ msg }}</option>
+                        {% endfor %}
+                    </select>                    
+                  </div><!--form-group col-10-->
+                  <div class="form-group col-12">
+                    </br>
+                    <textarea name="quote" rows="3" cols="50" placeholder="추가할 명언을 작성해주세요"></textarea>
+                  </div><!--form-group col-10-->
+                  <div class="form-group col-2">
+                    <form id="excelForm" role="form" action="" method="post">
+                      {% csrf_token %}
+                      <label for="quote_file", style=" padding: 6px 10px; background-color:#0D6EFD;border-radius: 4px;
+                      color: white;
+                      cursor: pointer;">
+                        파일
+                      </label>
+                      <input type="file" id="quote_file" accept=".xlsx, .xls, .csv" style="display: none"/>
+                    </form>
+                  </div><!--form-group col-3--> 
+                  <div class="form-group col-2">
+                    <button type="submit" id="quote_add" class="btn btn-primary">저장</button>
+                  </div><!--form-group col-3--> 
+                  <div class="form-group col-7">
+                  </div>
+                </div> <!--row quote-->
+                </br>
+                </br>
+                <!--로그 row-->
+                <div role="group" class="row">
+                  <div>
+                    <label for="categorization"><h4>결과 메세지</h4></label>
+                    <select id="assignedlog" name="assignedlog" class="select" multiple="multiple" data-placeholder=""
+                                      style="width: 100%;">                                            
+                    </select>              
+                  </div>     
+                  <div class="col-lg-1">
+                    <label class="col-sm-2 col-form-label"></label>                                  
+                    <div class="row mb-4">
+                      <button type="button" id="submit" class="btn btn-primary">보내기</button>
+                    </div><!--row mb-3-->
+                  </div><!--form-group col-lg-1-->
+                  <div class="col-lg-10">
+                  </div><!--form-group col-lg-1-->
+                  <div class="col-lg-1">
+                    <label class="col-sm-2 col-form-label"></label>                                  
+                    <div class="row mb-3">
+                      <button type="button" id="delete" class="btn btn-primary">지우기</button>
+                    </div><!--row mb-3-->
+                  </div><!--form-group col-lg-1-->
+                </div><!--row log-->                            
+              </form><!-- End General Form Elements -->      
+            </div><!--tab-pane fade show active-->            
+          </div><!-- End tab-content pt-2 -->         
+        </div><!--card-body m-0-->        
+      </div><!--card-->
+    </div><!--col-lg-8-->    
+  </div><!--row justify-content-center-->
+  </section>
+
+</main><!-- End #main -->
+
+  <!-- ======= Footer ======= -->
+
+
+<a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+  <!-- Vendor JS Files -->
+  <script src="{%static 'assets/vendor/apexcharts/apexcharts.min.js' %}"></script>
+  <script src="{%static 'assets/vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+  <script src="{%static 'assets/vendor/chart.js/chart.min.js' %}"></script>
+  <script src="{%static 'assets/vendor/echarts/echarts.min.js' %}"></script>
+  <script src="{%static 'assets/vendor/quill/quill.min.js' %}"></script>
+  <script src="{%static 'assets/vendor/simple-datatables/simple-datatables.js' %}"></script>
+  <script src="{%static 'assets/vendor/tinymce/tinymce.min.js' %}"></script>
+  <script src="{%static 'assets/vendor/php-email-form/validate.js' %}"></script>
+  <!-- Template Main JS File -->
+  <script src="{%static 'assets/js/main.js' %}"></script>
+  <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>   
+  <script>        
+   $(document).ready(function log(){
+    $.ajax({
+      type: 'get',
+      url: 'log/',
+      datatype: 'JSON',
+      success: function(data){          
+        for(let d of data){          
+          $("#assignedlog").append(`<option>${d["log"]}</option>`);
+        }
+      },
+      error:function(request,status,error){
+        if (status !== 'undefined'){
+          alert(request['responseJSON']['error_msg'])
+        }
+        else{
+          alert(error)
+        }
+      }
+    })
+    });
+    $(document).ready(function (){
+      $.ajax({
+        type: 'get',
+        url: 'quote/',
+        datatype: 'JSON',
+        success: function(data){  
+          var data = data['data']
+          let len = data.length
+           for(let [i, d] of data.entries()){                        
+           $("#assignedQuote").append(`<option value="${ d["id"] }">${ i+1 } / ${ d["msg"] }</option>`);
+          } 
+        },
+        error:function(request,status,error){
+          if (status !== 'undefined'){
+            alert(request['responseJSON']['error_msg'])
+          }
+          else{
+            alert(error)
+          }
+        }
+      })
+      });
+
+    $(document).ready(function (){
+      $.ajax({
+        type: 'get',
+        url: 'msg/',
+        datatype: 'JSON',
+        success: function(data){  
+          var data = data['data']
+          let len = data.length
+          console.log(len)
+           for(let [i, d] of data.entries()){            
+           $("#assignedMessage").append(`<option value="${ d["id"] }">${ i+1 } / ${ d["msg"] }</option>`);
+          } 
+        },
+        error:function(request,status,error){
+          if (status !== 'undefined'){
+            alert(request['responseJSON']['error_msg'])
+          }
+          else{
+            alert(error)
+          }
+        }
+      })
+      });
+
+    $(document).ready(function (){
+      $.ajax({
+        type: 'get',
+        url: 'account/',
+        datatype: 'JSON',
+        success: function(data){  
+          var data = data['data']
+          let len = data.length          
+           for(let [i, d] of data.entries()){            
+           $("#assignedAccount").append(`<option id= "${ d["id"] }" value="${ d["id"] }">${ i+1 } / ${ d["nid"] } / ${ d["npw"] }</option>`);
+          } 
+        },
+        error:function(request,status,error){
+          if (status !== 'undefined'){
+            alert(request['responseJSON']['error_msg'])
+          }
+          else{
+            alert(error)
+          }
+        }
+      })
+      });
+
+
+    $(document).ready(function (){
+      $.ajax({
+        type: 'get',
+        url: 'receiver/',
+        datatype: 'JSON',
+        success: function(data){  
+          var data = data['data']
+          let len = data.length
+          console.log(len)
+           for(let [i, d] of data.entries()){
+           $("#assignedReceiver").append(`<option value="${ d["id"] }">${ i+1 } / ${ d["nid"] } / ${ d["keyword"] } / ${ d["blog_name"] }</option>`);
+          } 
+        },
+        error:function(request,status,error){
+          if (status !== 'undefined'){
+            alert(request['responseJSON']['error_msg'])
+          }
+          else{
+            alert(error)
+          }
+        }
+      })
+      });
+    
+    
+    $('#submit').on('click', function (e) {
+      const accs = $('#assignedAccount').val();
+      const receivers = $('#assignedReceiver').val();
+      const msg = $('#assignedMessage').val();
+      const quote = $('#assignedQuote').val();      
+      const url = 'note/'
+      if (msg.length < 1){
+        alert('선택된 메세지가 없습니다.')
+        return
+      }
+      if (accs.length >= 2){
+        alert('발신 계정은 한 개만 선택 해주세요')
+        return 
+      }
+      if (receivers.length > 50){
+        alert('한 계정당 쪽지 발신 수는 50개 입니다.')
+        return
+      }
+
+      let data = {accs: accs, receiver: receivers, msg: msg, quote: quote}     
+      alert(`${receivers.length}명에게 쪽지를 보냅니다.`)
+      $.ajax({          
+        url: url,           
+        type: 'POST',
+        data: JSON.stringify(data),
+        datatype: "json",          
+        success: function result (data, status){
+          var forms = ''
+          $.each(data, function(i, v){
+            forms += v['log']              
+          });            
+          $("#assignedlog").prepend(forms);
+        },
+        error:function(request,status,error){
+          if (status !== 'undefined'){
+            alert(request.responseJSON.error_msg)
+          }
+          else{
+            alert(request)              
+          }
+        }
+      });
+    });
+
+    $('#delete').on('click', function (e) {
+      const accs = $('#assignedAccount').val();
+      const receivers = $('#assignedReceiver').val();
+      const msg = $('#assignedMessage').val();
+      const quote = $('#assignedQuote').val();
+      const data = {accs: accs, receivers: receivers, msg: msg, quote: quote}
+      const url = 'data/delete/'
+      $.ajax({
+        url: url,
+        type: 'DELETE',
+        data: JSON.stringify(data),
+        datatype: "json",
+        success: function(xhr, status){
+          alert(`${status} F5를 누르십시요`)
+        },
+        error:function(request,status,error){
+          alert('도중에 에러가 발생했습니다.')
+        }
+      })      
+    });
+    $('#accoount_insert').on('click', function (e) {
+      const nid = $('#acc_nid').val()
+      const npw = $('#acc_npw').val()      
+      const formData = new FormData();
+      
+      formData.append('excelfile', document.querySelector('#account_file').files[0]);
+      console.log(formData.get('excelfile'))
+      const url = 'account/register/'
+      if (formData.get('excelfile') !== 'undefined') {
+        $.ajax({          
+          url: url,
+          type: 'POST',
+          data: formData,
+          contentType: false, // NEEDED, DON'T OMIT THIS (requires jQuery 1.6+)
+          processData: false, // NEEDED, DON'T OMIT THIS                    
+          success: function(xhr, status){
+            alert(`${status} F5를 누르십시요`);
+          },
+          error:function(request,status,error){                
+            alert(request.responseJSON.error_msg)
+          }
+        });
+      }
+      else{
+        if (nid == ''){          
+          $.ajax({
+            url: 'account/excel/download',
+            type: 'GET',
+            datatype: "json",
+            success: function(data){
+              alert('파일 다운로드');
+              if (data !== null){                              
+                $("#acc_form").append(`<button type="button"><a href="${data['data']}" download>계정 엑셀 형식 다운</a></button>`)
+              }
+            },
+            error:function(request,status,error){                
+              alert(request.responseJSON.error_msg)
+            }
+          });
+        }
+        else{
+          let data = {nid: nid, npw: npw}
+          console.log(data)
+          alert('계정 등록합니다.')
+          $.ajax({
+            url: url,
+            type: 'POST',
+            data: JSON.stringify(data),
+            datatype: "json",
+            success: function(xhr, status){
+              alert(`${status} F5를 누르십시요`);
+            },
+            error:function(request,status,error){                
+              alert(request.responseJSON.error_msg)
+            }
+          });
+        }
+      }
+    });
+
+    $('#msg_add').on('click', function (e) {
+      const msg = document.getElementsByName("msg")[0].value;
+      const data = {msg: msg}
+      const url = 'msg/register/'      
+      $.ajax({
+        url: url,
+        type: 'POST',
+        data: JSON.stringify(data),
+        datatype: "json",
+        success: function(xhr, status){
+          alert(`${status} F5를 누르십시요`);
+        },
+        error:function(request,status,error){                
+          alert(request.responseJSON.error_msg)
+        }
+      });      
+    });
+    $('#quote_add').on('click', function (e) {
+      const msg = document.getElementsByName("quote")[0].value;
+      const data = {msg: msg}
+      const formData = new FormData();
+      const url = 'quote/register/'
+      formData.append('excelfile', document.querySelector('#quote_file').files[0]);
+      console.log(formData.get('excelfile'))
+      if (formData.get('excelfile') !== 'undefined') {
+        $.ajax({          
+          url: url,
+          type: 'POST',
+          data: formData,
+          contentType: false, // NEEDED, DON'T OMIT THIS (requires jQuery 1.6+)
+          processData: false, // NEEDED, DON'T OMIT THIS                    
+          success: function(xhr, status){
+            alert(`${status} F5를 누르십시요`);
+          },
+          error:function(request,status,error){                
+            alert(request.responseJSON.error_msg)
+          }
+        });
+      }
+      else{
+        $.ajax({
+          url: url,
+          type: 'POST',
+          data: JSON.stringify(data),
+          datatype: "json",
+          success: function(xhr, status){
+            alert(`${status} F5를 누르십시요`);
+          },
+          error:function(request,status,error){                
+            alert(request.responseJSON.error_msg)
+          }
+        });
+      }
+    });
+    $('#collect').on('click', function (e) {
+      const keyword = document.getElementsByName("keyword")[0].value;
+      if (keyword == ''){
+        alert('블로거 엑셀폼을 생성.')
+      }
+      const data = {keyword: keyword}
+      const url = 'keyword/collect/'
+      $.ajax({
+        url: url,
+        type: 'POST',
+        data: JSON.stringify(data),
+        datatype: "json",
+        success: function(data){
+          alert('파일 다운로드');
+          if (data !== null){
+            console.log(data)                     
+            $("#bloger_form").append(`<button type="button"><a href="${data['data']}" download>다운로드</a></button>`)
+          }
+        },
+        error:function(request,status,error){                
+          alert(request.responseJSON.error_msg)
+        }
+      });
+    })
+
+    $('#accoount_cetainty').on('click', function certain (e) {
+      const accs = $('#assignedAccount').val();
+      const url = 'account/check/'
+      if (accs.length >= 2){
+        alert('검증 계정은 한 개만 선택 해주세요')
+        return 
+      }
+      const data = {ids: accs}
+      console.log(accs)
+      
+      $.ajax({
+        url: url,
+        type: 'POST',
+        data: JSON.stringify(data),
+        datatype: "json",
+        beforeSend: function (xhr) {
+          alert('검증을 시작합니다.')
+        },
+        success: function(xhr, status){
+          const data = xhr['data']
+          const result = data['result']
+          const id = data['id']
+          console.log(id, result)
+          $(`#${id}`).append(` / ${result}`)
+          alert('검증 완료')
+        },
+        error:function(request,status,error){                
+          alert(`검증 불가 테더링 연결 확인해주세요~~!!`)
+        }
+      });
+    });
+
+    $('#receiver_nid').on('click', function (e) {
+      const nid = document.getElementsByName("nid")[0].value;      
+      const url = 'receiver/register/'
+      const formData = new FormData();      
+      formData.append('excelfile', document.querySelector('#bloger_file').files[0]);
+      console.log(formData.get('excelfile'))
+      if (formData.get('excelfile') !== 'undefined') {
+        $.ajax({
+          url: url,
+          type: 'POST',
+          data: formData,
+          contentType: false, // NEEDED, DON'T OMIT THIS (requires jQuery 1.6+)
+          processData: false, // NEEDED, DON'T OMIT THIS
+          success: function(xhr, status){
+            alert(`${status} F5를 누르십시요`);
+          },
+          error:function(request,status,error){
+            alert(request.responseJSON.error_msg)
+          }
+        });
+      }
+      else{        
+        const data = {nid: nid}        
+        $.ajax({
+          url: url,
+          type: 'POST',
+          data: JSON.stringify(data),
+          datatype: "json",
+          success: function(xhr, status){
+            alert(`${status} F5를 누르십시요`);
+          },
+          error:function(request,status,error){
+            alert(request.responseJSON.error_msg)
+          }
+        });
+        }
+    });
+  </script>
+ <script>
+   
+ </script>
+</body>
+
+</html>
+
