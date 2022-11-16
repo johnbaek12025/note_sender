@@ -4,27 +4,38 @@ import re
 import random
 import time
 
+from setting import make_excel
+
 
 class Collector:
     def __init__(self, keyword) -> None:
         self.url = "https://s.search.naver.com/p/blog/search.naver?where=blog&sm=tab_pge&api_type=1&query={keyword}&rev=44&start={cnt}&dup_remove=1&post_blogurl=&post_blogurl_without=&nso=&dkey=0&source_query=&nx_search_query={keyword}&spq=0&_callback=viewMoreContents"
         self.keyword = keyword
+        self.columns = ['bid', 'blog_name', 'keyword']
     
     def set_session(self):
         return requests.Session()
 
+    
     def main(self):
         s = self.set_session()
+        data = {}
         for i in range(31):
             cnt = i * 30 + 1
             url = self.url.format(keyword=self.keyword, cnt=i)
             res = self.status_validation(url, s)
-            dict_list = self.collect_bloger(res)
-            print(dict_list)
-            break
-        # info = bf(res.text, 'html.parser')
-        # data = []
+            d =  self.collect_bloger(res)
+            data.update(d)
+        data = self.dict_reset(data)
+        make_excel(self.columns, data, self.keyword)
         
+    
+    def dict_reset(self, data):
+        list_dict = []
+        for k, v in data.items():
+            list_dict.append({'bid':k, 'blog_name': v[0], 'keyword': v[1]})
+        return list_dict
+    
     def collect_bloger(self, res):
         info = bf(res, 'html.parser')
         data = {}

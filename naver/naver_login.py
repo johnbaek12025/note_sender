@@ -9,13 +9,9 @@ import uuid
 import lzstring
 from typing import List, Tuple, Dict, Set
 from decouple import config
-from ip_util import switchIp2
 
-class CheckingError(Exception):
-   pass
-
-class LoginError(Exception):
-    pass
+from .exceptions import LoginError, CheckingError
+from .ip_util import switchIp2
 
 
 class NaverLogin:
@@ -113,7 +109,6 @@ class NaverLogin:
         res = self.status_validation(finalize_url, self.session)        
         return self.session
         
-
 
 class NoteSender(NaverLogin):
     def __init__(self, **kwargs):
