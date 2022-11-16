@@ -1,4 +1,5 @@
 {%extends 'base.html'%} {% load static %} {% block main_area %}
+{% include 'alert.html' %}
 <!-- Main Section Start -->
 <div class="main-section">
   <div
@@ -28,8 +29,7 @@
               <div id="restaurant-sets-holder">
                 <form
                   class="form-fields-set foodbakery-dev-restaurant-form"
-                  method="post"
-                  action="register-select-package.html"
+                  method="post"                  
                    >
                    {% csrf_token %}
                   <ul
@@ -41,9 +41,7 @@
                           <div class="row">
                             <ul>
                               <li>
-                                <div
-                                  class="col-lg-6 col-md-6 col-sm-6 col-xs-12"
-                                    >
+                                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
                                   <div class="field-holder">
                                     <label>발신 계정</label>
                                     <div class="row">                                      
@@ -56,39 +54,38 @@
                                     </div>
                                     <div class="row">
                                       <div class="select-holder">
-                                        <select class="form-select" multiple aria-label="multiple select example">
-                                            {% for acc in acc_list%} 
-                                            <option value="{{acc.id}}">{{acc.nid}} / {{acc.npw}}</option>
-                                            {% endfor %}
+                                        <select class="form-select" name="accounts" multiple aria-label="multiple select example" size="5" style="height: 100%;">
+                                              {% for acc in acc_list%} 
+                                              <option value="{{acc.id}}">{{acc.nid}} / {{acc.validation}}</option>
+                                              {% endfor %}
                                         </select>
                                       </div>
                                     </div>
                                   </div>
                                 </div>
-                                <div
-                                  class="col-lg-6 col-md-6 col-sm-6 col-xs-12"
-                                >
+                                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
                                   <div class="field-holder">
                                     <label>수신자 아이디</label>
                                     <div class="row">                                      
                                       <div class="col">
                                         <button type="button" class="btn btn-outline-info" data-target="#blg_reg" data-toggle="modal">수신자 등록</button>
                                     </div>
+                                    {%comment%} <div class="col">
+                                      <button type="button" class="btn btn-outline-info" data-target="#blg_col" data-toggle="modal">수신자 수집</button>
+                                    </div> {%endcomment%}
                                     </div>
                                     <div class="row">
                                       <div class="select-holder">
-                                        <select class="form-select" multiple aria-label="multiple select example">
+                                        <select class="form-select" name="receivers" multiple aria-label="multiple select example" size="5" style="height: 100%;">
                                           {% for blg in bloger_list%} 
-                                          <option value="{{blg.id}}">{{blg.nid}}</option>
+                                          <option value="{{blg.id}}">{{blg.bid}} / {{blg.blog_name|truncatewords:5}} / {{blg.keyword}}</option>
                                           {% endfor %}
                                           </select>
                                       </div>
                                     </div>
                                   </div>
                                 </div>
-                                <div
-                                  class="col-lg-12 col-md-6 col-sm-6 col-xs-12"
-                                >
+                                <div class="col-lg-12 col-md-6 col-sm-6 col-xs-12">
                                   <div class="field-holder">
                                     <label>메세지</label>
                                     <div class="row">
@@ -98,18 +95,16 @@
                                     </div>
                                     <div class="row">
                                       <div class="col">
-                                        <select class="form-select" multiple aria-label="multiple select example">
+                                        <select class="form-select" name="message" multiple aria-label="multiple select example" size="5" style="height: 100%;">
                                           {% for msg in msg_list%} 
-                                          <option value="{{msg.id}}">{{msg.msg}}</option>
-                                          {% endfor %}
+                                          <option value="{{msg.id}}">{{msg.msg|truncatewords:20}}</option>
+                                          {% endfor %}                                          
                                           </select>
                                       </div>
                                     </div>
                                   </div>
                                 </div>
-                                <div
-                                  class="col-lg-12 col-md-6 col-sm-6 col-xs-12"
-                                >
+                                <div class="col-lg-12 col-md-6 col-sm-6 col-xs-12">
                                   <div class="field-holder">
                                     <label>명언</label>
                                     <div class="row">
@@ -119,23 +114,21 @@
                                     </div>
                                     <div class="row">
                                       <div class="col">
-                                        <select class="form-select" multiple aria-label="multiple select example">
+                                        <select class="form-select" name="quote" multiple aria-label="multiple select example" size="5" style="height: 100%;">
                                           {% for q in quote_list%} 
-                                            <option value="{{q.id}}">{{q.msg}}</option>
+                                            <option value="{{q.id}}">{{q.qut|truncatewords:20}}</option>
                                           {% endfor %}
                                           </select>
                                       </div>
                                     </div>
                                   </div>
                                 </div>
-                                <div
-                                  class="col-lg-12 col-md-6 col-sm-6 col-xs-12"
-                                >
+                                <div class="col-lg-12 col-md-6 col-sm-6 col-xs-12">
                                   <div class="field-holder">
                                     <label>발신 결과</label>
                                     <div class="row">
                                         <div class="col">
-                                          <select class="form-select" multiple aria-label="multiple select example" size="6" disabled>                                              
+                                          <select class="form-select" multiple aria-label="multiple select example" size="10" style="height: 100%;" disabled>
                                             {% for l in log_list%} 
                                             <option value="{{l.id}}">{{l.msg}}</option>
                                             {% endfor %}
@@ -155,14 +148,14 @@
                         <div class="col-lg-6 col-md-12 col-sm-12 col-xs-12">
                           <div class="float-start field-holder">
                             <div class="float-start payment-holder">
-                                <button type="button" id="send_note" class="btn btn-info">Submit</button>                                
+                                <button type="submit" id="send_note" class="btn btn-info">Submit</button>                                
                             </div>                                                        
                           </div>
                         </div>
                         <div class="col-lg-6 col-md-12 col-sm-12 col-xs-12">
                             <div class="float-end field-holder">
                                 <div class="float-end field-holder">
-                                    <button type="button" id="data_delete" class="btn btn-warning">Delete</button>
+                                    <button type="submit" id="data_delete" class="btn btn-warning">Delete</button>
                                 </div>
                             </div>
                         </div>
@@ -201,13 +194,13 @@
               </h5>
             </div>
             <div class="modal-body">
-              <form method="post">
+              <form method="post" enctype="multipart/form-data" action="">
                 {% csrf_token %}             
-                {{acc_reg.as_p}}
+                {{AccForm.as_div}}
                 <div class="input-filed">
                   <label>대량 등록</label>
                   <div class="input-group">
-                    <input type="file" class="form-control" id="inputGroupFile04" aria-describedby="quote_button" aria-label="Upload">                    
+                    <input type="file" class="form-control" id="AccForm-file" name="AccForm-file" aria-label="Upload">
                   </div>
                 </div>                 
                 <div class="input-filed input-field-btn">
@@ -246,24 +239,21 @@
                 </h5>
               </div>
               <div class="modal-body">
-                <form
-                    method="post"
-                    class="wp-user-form webkit"
-                    id="ControlForm_43687">
+                <form method="post" enctype="multipart/form-data" action="">
                     {% csrf_token %}             
                     <div class="input-filed">
-                      <i class="icon-user4"></i>
-                      <input type="text" placeholder="수신자 아이디" />
+                      <!-- <i class="icon-user4"></i> -->
+                      {{RecForm.as_div}}
                     </div>
                     <div class="input-filed">
                       <label>대량 등록</label>
                       <div class="input-group">
-                        <input type="file" class="form-control" id="inputGroupFile04" aria-describedby="quote_button" aria-label="Upload">                    
+                        <input type="file" class="form-control" id="RecForm-file" name="RecForm-file" aria-label="Upload">
                       </div>
                     </div>                  
                     <div class="input-filed input-field-btn">
                       <div class="ajax-login-button input-button-loader">
-                        <input type="button" class="cs-bgcolor" value="등록"/>
+                        <input type="submit" class="cs-bgcolor" value="등록"/>
                       </div>
                     </div>
                 </form>                             
@@ -276,6 +266,47 @@
   </div>
   <!-- Modal Popup For Blg End -->
 
+  <!-- Modal Popup Start For Blg_collect -->
+<div class="modal fade" id="blg_col" aria-labelledby="myModalLabel">
+  <div class="modal-dialog">
+    <div class="login-form">
+      <div class="modal-content">
+        <div class="tab-content">
+          <div id="user-login-tab" class="tab-pane fade in active">
+            <div class="modal-header">
+              <button
+                type="button"
+                class="float-start close"
+                data-dismiss="modal"
+                aria-label="Close"
+              >
+                <span aria-hidden="true">×</span>
+              </button>
+              <h5 class="modal-title">
+                수신자 수집
+              </h5>
+            </div>
+            <div class="modal-body">
+              <form method="post" enctype="multipart/form-data" action="collect/">
+                  {% csrf_token %}             
+                  <div class="input-filed">
+                    <input type="text" name='keyword'  placeholder="수집할 키워드" />                  
+                  </div>                  
+                  <div class="input-filed input-field-btn">
+                    <div class="ajax-login-button input-button-loader">
+                      <input type="submit" class="cs-bgcolor" value="등록"/>
+                    </div>
+                  </div>
+              </form>                             
+            </div>
+          </div>                    
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Modal Popup For Blg_collect End -->
+
   <!-- Modal Popup Start For Msg -->
 <div class="modal fade" id="msg_reg" aria-labelledby="myModalLabel">
     <div class="modal-dialog">
@@ -284,12 +315,10 @@
           <div class="tab-content">
             <div id="user-login-tab" class="tab-pane fade in active">
               <div class="modal-header">
-                <button
-                  type="button"
-                  class="float-start close"
-                  data-dismiss="modal"
-                  aria-label="Close"
-                >
+                <button type="button"
+                class="float-start close"
+                data-dismiss="modal"
+                aria-label="Close">
                   <span aria-hidden="true">×</span>
                 </button>
                 <h5 class="modal-title">
@@ -297,17 +326,14 @@
                 </h5>
               </div>
               <div class="modal-body">                
-                <form
-                  method="post"
-                  class="wp-user-form webkit"
-                  id="ControlForm_43687">      
+                <form method="post">      
                   {% csrf_token %}           
                   <div class="input-filed">                      
-                    <textarea class="form-control" aria-label="With textarea"></textarea>
+                    {{MsgForm.as_p}}
                   </div>                  
                   <div class="input-filed input-field-btn">
                     <div class="ajax-login-button input-button-loader">
-                      <input type="button" class="cs-bgcolor" value="등록" />
+                      <input type="submit" class="cs-bgcolor" value="등록" />
                     </div>
                   </div>
                 </form>
@@ -342,23 +368,20 @@
                 </h5>
               </div>
               <div class="modal-body">                                
-                  <form
-                    method="post"
-                    class="wp-user-form webkit"
-                    id="ControlForm_43687">      
+                  <form method="post" enctype="multipart/form-data" action="">      
                     {% csrf_token %}           
                     <div class="input-filed">                      
-                      <textarea class="form-control" aria-label="With textarea"></textarea>
+                      {{QutForm.as_p}}
                     </div>
                     <div class="input-filed">
                       <label>대량 등록</label>
                       <div class="input-group">
-                        <input type="file" class="form-control" id="inputGroupFile04" aria-describedby="quote_button" aria-label="Upload">                    
+                        <input type="file" class="form-control" id="QutForm-file" name="QutForm-file"  aria-label="Upload">                    
                       </div>
                     </div>                  
                     <div class="input-filed input-field-btn">
                       <div class="ajax-login-button input-button-loader">
-                        <input type="button" class="cs-bgcolor" value="등록" />
+                        <input type="submit" class="cs-bgcolor" value="등록" />
                       </div>
                     </div>
                   </form> 
@@ -401,15 +424,15 @@
                     {% csrf_token %}                 
                     <div class="input-filed">
                       <i class="icon-user4"></i>
-                      <input type="text" placeholder="Username" />
+                      <input type="text" name='uname' placeholder="Username" />
                     </div>
                     <div class="input-filed">
                       <i class="icon-unlock-alt"></i>
-                      <input type="password" value="Password" />
+                      <input type="password" name="pwd" value="Password" />
                     </div>                  
                     <div class="input-filed input-field-btn">
                       <div class="ajax-login-button input-button-loader">
-                        <input type="button" class="cs-bgcolor" value="Log in" />
+                        <input type="submit" class="cs-bgcolor" value="Log in" />
                       </div>
                     </div>
                   </form>                             
@@ -423,6 +446,4 @@
   </div>
   <!-- Modal Popup For Login End -->
 
-<script>  
-</script>
 {% endblock %}

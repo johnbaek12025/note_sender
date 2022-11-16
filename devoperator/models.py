@@ -5,12 +5,12 @@ from django.utils.timezone import now
 class NaverAccounts(models.Model):
     class Meta:
         ordering = ["-birth"]
-
     birth = models.DateTimeField(auto_now_add=True)
-    nid = models.CharField(max_length=200)
+    nid = models.CharField(max_length=200, unique=True)
     npw = models.CharField(max_length=200)    
     modified_at = models.DateTimeField(auto_now=True)
     validation = models.BooleanField(default=False)
+    
     
 
 
@@ -30,8 +30,11 @@ class NoteSendingLog(models.Model):
 class Message(models.Model):
     msg = models.TextField()
     birth = models.DateTimeField(auto_now_add=True)
+    
 
 
 class Quote(models.Model):
-    msg = models.TextField()
+    qut = models.TextField()
     birth = models.DateTimeField(auto_now_add=True)
+    
+    
