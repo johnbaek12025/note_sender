@@ -10,7 +10,7 @@ import lzstring
 from typing import List, Tuple, Dict, Set
 from decouple import config
 
-from .exceptions import LoginError, CheckingError
+from devoperator.views.exception import *
 from .ip_util import switchIp2
 
 
@@ -103,9 +103,12 @@ class NaverLogin:
             'bvsd': bvsd
         }
         res = self.status_validation(self.login_url, self.session, post_data=post_data)
-        finalize_url = re.search(r'location\.replace\("([^"]+)"\)', res).group(1)        
+        try:
+            finalize_url = re.search(r'location\.replace\("([^"]+)"\)', res).group(1)
+        except TypeError:
+            raise LoginError
         if 'help' in finalize_url:
-            raise LoginError('login is failed')
+            raise LoginError
         res = self.status_validation(finalize_url, self.session)        
         return self.session
         
@@ -120,9 +123,9 @@ class NoteSender(NaverLogin):
             "svcType": "undefined",
             "svcId": None,
             "svcName": None,
-            'content': kwargs['msg'],
+            'content': kwargs.get('msg'),
             "isReplyNote": 0,
-            "targetUserId": kwargs['taker'],
+            "targetUserId": kwargs.get('taker'),
             "isBackup": 1,
             "u": None
         }
@@ -156,12 +159,20 @@ class NoteSender(NaverLogin):
 
 
 if __name__=='__main__':
-    nid = config('nid')
-    npw = config('npw')
-    # switchIp2()
-    nl = NaverLogin(nid, npw)    
-    session = nl.login()
-    messge = 'It is okay with Jesus'
-    receiver = 'rascu'
-    note = NoteSender(session=session, msg=messge, taker=receiver)
-    note.sending()
+    # nid = config('nid')
+    nid = 'leilamustafa'
+    npw = '0^vc#8pz'
+    # switchIp2()    
+    nl = NaverLogin(nid, npw)
+    try:        
+        session = nl.login()
+    except LoginError:
+        print(f"{nid}의 계정을 확인")
+    # session = nl.login()
+    # print(session)
+    # messge = 'It is okay with Jesus'
+    # receiver = 'rascu'
+    # note = NoteSender(session=session)
+    # check = note.check_note_count()
+    # print(check)
+    # # note.sending()

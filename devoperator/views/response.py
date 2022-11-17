@@ -14,14 +14,15 @@ from openpyxl import load_workbook
 from django.db import DatabaseError
 from django.contrib import messages
 from xlsxwriter import Workbook
-
+from django.contrib import auth
 from crawler.models import Bloger
 from devoperator.models import Message, NaverAccounts, NoteSendingLog, Quote
 from devoperator.utility.make_dir import create_dir
 from devoperator.utility.utility import accumulator, file_handle
-from naver.exceptions import LoginError
+from devoperator.views.exception import *
 from naver.naver_login import NaverLogin, NoteSender
 # from naver.bloger_collect import Collector
+from django.views.decorators.csrf import csrf_exempt
 
 from ..forms import *
 from .common import BasicJsonResponse, HttpResponseBase
@@ -76,42 +77,57 @@ class MultipleFormView(TemplateView):
             return BasicJsonResponse(is_success=False, status=503, error_msg=e)
         else:
             return HttpResponseRedirect("/")
-            
-    def post(self, request):        
-        def get_form_name():
-            for r in request.POST:
-                x = re.sub('\-.+', '', r)
-                if x in self.form_classes:
-                    return x             
-        def check():
-            for k, v in request.POST.items():                
-                if k == 'csrfmiddlewaretoken':
-                    continue                
-                if len(v) == 0:
-                    return False
-                return True
-        
-        if request.FILES:            
-            name = get_form_name()
-            try:
-                self.file_flatten_save(name, request.FILES)
-            except TypeError:
-                messages.warning(request, '입력한 데이터가 서로 다릅니다.')            
-        if request.POST:
-            l1 = list(request.POST)
-            contain = all(item in l1 for item in self.send_keys)
-            if contain:
-                self.sending_method()
+
+    def login_post(self):
+        if self.request.method == 'POST':
+            username = self.request.POST['uname']
+            pwd = self.request.POST['pwd']
+            user = auth.authenticate(username=username, password=pwd)
+            if user:
+                auth.login(self.request, user)
+                messages.success(self.request, '로그인 성공')
             else:
+                messages.error(self.request, '로그인 실패')
+        
+            
+    def post(self, request):
+        if request.user.is_authenticated:
+            def get_form_name():
+                for r in request.POST:
+                    x = re.sub('\-.+', '', r)
+                    if x in self.form_classes:
+                        return x             
+            def check():
+                for k, v in request.POST.items():                
+                    if k == 'csrfmiddlewaretoken':
+                        continue                
+                    if len(v) == 0:
+                        return False
+                    return True
+            
+            if request.FILES:            
                 name = get_form_name()
                 try:
-                    form_class = self.form_classes[name](request.POST)
-                except KeyError:
-                    messages.warning(request, '데이터를 다시 선택해 주세요.')
-                else:                    
-                    if form_class.is_valid():                
-                        if check():                
-                            form_class.save()
+                    self.file_flatten_save(name, request.FILES)
+                except TypeError:
+                    messages.warning(request, '입력한 데이터가 서로 다릅니다.')            
+            if request.POST:            
+                l1 = list(request.POST)
+                contain = all(item in l1 for item in self.send_keys)
+                if contain:
+                    self.sending_method()
+                else:
+                    name = get_form_name()
+                    try:
+                        form_class = self.form_classes[name](request.POST)
+                    except KeyError:
+                        messages.warning(request, '데이터를 다시 선택해 주세요.')
+                    else:                    
+                        if form_class.is_valid():                
+                            if check():                
+                                form_class.save()
+        else:
+            self.login_post()
         return HttpResponseRedirect("/")
     
     def sending_method(self):
@@ -160,24 +176,50 @@ class NoteDataView(MultipleFormView):
             context[f] = self.form_classes[f]
         return context
  
-
+@csrf_exempt
 def account_check(request):
-    acc = request.POST['accounts']
-    acc = NaverAccounts.objects.get(id=acc[0])
-    nid = acc.nid
-    npw = acc.npw
-    nl = NaverLogin(nid, npw)
-    try:   
-        session = nl.login()
-    except LoginError:
-        messages.warning(request, f'{nid} 계정을 확인 해주세요~!!')
-    else:
-        acc.validation = True
-        acc.save()
+    if request.method == 'POST':
+        acc = json.loads(request.body.decode('utf-8'))['accounts']        
+        acc = NaverAccounts.objects.get(id=acc[0])
+        nid = acc.nid
+        npw = acc.npw
+        nl = NaverLogin(nid, npw)
+        try:   
+            nl.login()        
+        except LoginError:
+            messages.warning(request, f'{nid} 계정을 확인 해주세요~!!')
+        else:
+            acc.validation = True
+            acc.save()
+        return HttpResponseRedirect("/")
+
+def gather_taker(request):
+    if request.method == 'POST':
+        keyword = request.POST['keyword']
+        print(keyword)
+        # c = Collector(keyword)
+        # c.main()
     return HttpResponseRedirect("/")
 
-def sweep_taker(request):
-    keyword = request.POST['keyword']
-    # c = Collector(keyword)
-    # c.main()
+@csrf_exempt
+def sweep_data(request):    
+    if request.method == 'DELETE':
+        send_keys = ['accounts', 'receivers', 'message', 'quote']
+        name_map = {'receivers': Bloger, 'accounts': NaverAccounts, 'quote': Quote, 'message': Message}
+        data = json.loads(request.body.decode('utf-8'))        
+        for k in send_keys:            
+            if data[k]:
+                model_instance = name_map[k].objects.filter(id__in=data[k])
+                model_instance.delete()        
+        messages.success(request, '삭제 완료')
+        return HttpResponseBase('삭제 완료')            
     return HttpResponseRedirect("/")
+                 
+
+def logout(request):
+    for n in NaverAccounts.objects.all():
+        n.validation=False
+        n.save()
+    auth.logout(request)    
+    return HttpResponseRedirect("/")
+    

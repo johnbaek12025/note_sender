@@ -19,3 +19,9 @@ class SessionExpiration(SessionError):
 
 class NotParsedError(Exception):
     pass
+
+class LoginError(Exception):
+    pass
+
+class CheckingError(Exception):
+    pass
