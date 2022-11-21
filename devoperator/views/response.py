@@ -17,7 +17,7 @@ from xlsxwriter import Workbook
 from django.contrib import auth
 from crawler.models import Bloger
 from devoperator.models import Message, NaverAccounts, NoteSendingLog, Quote
-from devoperator.tasks import task_distributor
+from devoperator.tasks.distributor import task_distributor
 from devoperator.views.exception import *
 from naver.naver_login import NaverLogin, NoteSender
 # from naver.bloger_collect import Collector
@@ -201,7 +201,7 @@ def account_check(request):
 def gather_taker(request):
     if request.method == 'POST':
         keyword = request.POST['keyword']
-        task_distributor.send(**{"Collector": keyword})        
+        task_distributor.send(**{"Collector": keyword})             
         return HttpResponseRedirect("/")
 
 @csrf_exempt

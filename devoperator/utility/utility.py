@@ -7,31 +7,28 @@ import requests
 import re
 from bs4 import BeautifulSoup as bf
 
-from devoperator.views.exception import IntegrityError
+from devoperator.views.exception import IntegrityError       
+import json
+import os
+from xlsxwriter import Workbook
+
+CONFIG_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'config')
 
 
-def file_handle(excel_file):        
-        df = pd.read_excel(excel_file)
-        df = pd.DataFrame(df).iterrows()
-        data = []
-        duple = []
-        for index, row in df:
-            if row['nid'] not in duple:
-                duple.append(row['nid'])
-                data.append({'nid': row['nid'], 'blog_name': row['blog_name'], 'keyword': row['keyword']})        
-            else:
-                continue                
-        return data             
+def get_bring_data(file_name):
+    if file_name == 'debug':
+        fp = os.path.join(CONFIG_DIR, file_name)
+        if not os.path.exists(fp):
+            return False
+    fp = os.path.join(CONFIG_DIR, file_name)
+    with open(fp, 'r') as f:
+        return json.load(f)
 
-def accumulator(keyword, page):        
-    url = f"https://s.search.naver.com/p/blog/search.naver?where=blog&sm=tab_pge&api_type=1&query={keyword}&rev=44&start={page}&dup_remove=1&post_blogurl=&post_blogurl_without=&nso=&dkey=0&source_query=&nx_search_query={keyword}&spq=0&_callback=viewMoreContents"
-    # url = requote_uri(url)
-    res = requests.get(url)
-    info = bf(res.text, 'html.parser')
-    data = []
-    for a in info.find_all('a', {"class": '\\"sub_txt'}):    
-        res1 = re.sub(r'[a-z./:"\\]+.com/','', a['href'])
-        nid = re.sub(r'\\"','', res1)
-        b_name = a.text
-        data.append({'nid': nid, 'blog_name': b_name, 'keyword': keyword})
-    return data
+def make_excel(columns:list, data:list, file_name):
+    wb = Workbook(f"{file_name}.xlsx")
+    ws = wb.add_worksheet()
+    [ws.write(0, i, c) for i, c in enumerate(columns)]
+    for i, ele in enumerate(data, start=1):
+        for k, v in ele.items():
+            ws.write(i, columns.index(k), v)
+    wb.close()

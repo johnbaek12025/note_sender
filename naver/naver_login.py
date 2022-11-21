@@ -12,8 +12,7 @@ from decouple import config
 
 from devoperator.views.exception import *
 from .ip_util import switchIp2
-import dramatiq
-from dramatiq.middleware import CurrentMessage
+
 
 
 class NaverLogin:
