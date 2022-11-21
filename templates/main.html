@@ -35,6 +35,7 @@
               {%endif%}              
               <hr />
               <div id="restaurant-sets-holder">
+                {% if user.is_authenticated %}
                 <form
                   class="form-fields-set foodbakery-dev-restaurant-form"
                   method="post"                  
@@ -52,7 +53,6 @@
                                 <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
                                   <div class="field-holder">
                                     <label>발신 계정</label>
-                                    {% if user.is_authenticated %}
                                     <div class="row">                                      
                                       <div class="col">
                                         <button type="button" class="btn btn-outline-info" data-target="#acc_reg" data-toggle="modal">계정등록</button>
@@ -61,15 +61,12 @@
                                         <button type="button" id="account_check" class="btn btn-outline-info">계정 검증</button>
                                       </div>
                                     </div>
-                                    {%endif%}
                                     <div class="row">
                                       <div class="select-holder">
                                         <select class="form-select" id="accounts" name="accounts" multiple aria-label="multiple select example" size="5" style="height: 100%;">
-                                          {% if user.is_authenticated %}
                                               {% for acc in acc_list%} 
                                               <option value="{{acc.id}}">{{acc.nid}} / {{acc.validation}}</option>
                                               {% endfor %}
-                                          {%endif%}
                                         </select>
                                       </div>
                                     </div>
@@ -78,7 +75,6 @@
                                 <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
                                   <div class="field-holder">
                                     <label>수신자 아이디</label>
-                                    {% if user.is_authenticated %}
                                     <div class="row">                                      
                                       <div class="col">
                                         <button type="button" class="btn btn-outline-info" data-target="#blg_reg" data-toggle="modal">수신자 등록</button>
@@ -87,15 +83,12 @@
                                         <button type="button" class="btn btn-outline-info" data-target="#blg_col" data-toggle="modal">수신자 수집</button>
                                       </div>
                                     </div>
-                                    {%endif%}
                                     <div class="row">
                                       <div class="select-holder">
                                         <select class="form-select" id="receivers" name="receivers" multiple aria-label="multiple select example" size="5" style="height: 100%;">
-                                          {% if user.is_authenticated %}
                                             {% for blg in bloger_list%} 
                                             <option value="{{blg.id}}">{{blg.bid}} / {{blg.blog_name|truncatewords:5}} / {{blg.keyword}}</option>
                                             {% endfor %}
-                                          {%endif%}
                                           </select>
                                       </div>
                                     </div>
@@ -104,21 +97,17 @@
                                 <div class="col-lg-12 col-md-6 col-sm-6 col-xs-12">
                                   <div class="field-holder">
                                     <label>메세지</label>
-                                    {% if user.is_authenticated %}
                                     <div class="row">
                                       <div class="col">
                                         <button type="button" class="btn btn-outline-info" data-target="#msg_reg" data-toggle="modal">메세지 등록</button>
                                       </div>
                                     </div>
-                                    {%endif%}
                                     <div class="row">
                                       <div class="col">
                                         <select class="form-select" id="message" name="message" multiple aria-label="multiple select example" size="5" style="height: 100%;">
-                                          {% if user.is_authenticated %}
                                           {% for msg in msg_list%} 
                                           <option value="{{msg.id}}">{{msg.msg|truncatewords:20}}</option>
                                           {% endfor %}                                          
-                                          {%endif%}
                                           </select>
                                       </div>
                                     </div>
@@ -127,21 +116,17 @@
                                 <div class="col-lg-12 col-md-6 col-sm-6 col-xs-12">
                                   <div class="field-holder">
                                     <label>명언</label>
-                                    {% if user.is_authenticated %}
                                     <div class="row">
                                       <div class="col">
                                         <button type="button" class="btn btn-outline-info" data-target="#quote_reg" data-toggle="modal">명언 등록</button>
                                       </div>
                                     </div>
-                                    {%endif%}
                                     <div class="row">
                                       <div class="col">
                                         <select class="form-select" id="quote" name="quote" multiple aria-label="multiple select example" size="5" style="height: 100%;">
-                                          {% if user.is_authenticated %}
                                           {% for q in quote_list%} 
                                             <option value="{{q.id}}">{{q.qut|truncatewords:20}}</option>
-                                          {% endfor %}
-                                          {%endif%}
+                                          {% endfor %}                                          
                                           </select>
                                       </div>
                                     </div>
@@ -152,12 +137,10 @@
                                     <label>발신 결과</label>
                                     <div class="row">
                                         <div class="col">
-                                          <select class="form-select" multiple aria-label="multiple select example" size="10" style="height: 100%;" disabled>
-                                            {% if user.is_authenticated %}
+                                          <select class="form-select" multiple aria-label="multiple select example" size="10" style="height: 100%;" disabled>                                            
                                             {% for l in log_list%} 
                                             <option value="{{l.id}}">{{l.msg}}</option>
-                                            {% endfor %}
-                                            {%endif%}
+                                            {% endfor %}                                            
                                             </select>
                                         </div>
                                       </div>
@@ -170,7 +153,6 @@
                       </div>
                     </li>
                     <li>
-                      {% if user.is_authenticated %}
                       <div class="row">
                         <div class="col-lg-6 col-md-12 col-sm-12 col-xs-12">
                           <div class="float-start field-holder">
@@ -187,10 +169,10 @@
                             </div>
                         </div>
                       </div>
-                      {%endif%}
                     </li>
                   </ul>
                 </form>
+                {% endif %}
               </div>
             </div>
           </div>
@@ -201,6 +183,59 @@
 </div>
 <!-- Main Section End -->
 
+
+<!-- Modal Popup Start For Account -->
+<div class="modal fade" id="sign-in" aria-labelledby="myModalLabel">
+  <div class="modal-dialog">
+    <div class="login-form">
+      <div class="modal-content">
+        <div class="tab-content">
+          <div id="user-login-tab" class="tab-pane fade in active">
+            <div class="modal-header">
+              <button
+                type="button"
+                class="float-start close"
+                data-dismiss="modal"
+                aria-label="Close"
+              >
+                <span aria-hidden="true">×</span>
+              </button>
+              <h5 class="modal-title">
+                Login To Your Account
+              </h5>
+            </div>
+            <div class="modal-body">                
+              <div class="cs-login-pbox">                  
+                <form                    
+                  method="post"
+                  class="wp-user-form webkit"
+                  id="ControlForm_43687">
+                  {% csrf_token %}                 
+                  <div class="input-filed">
+                    <i class="icon-user4"></i>
+                    <input type="text" name='uname' placeholder="Username" />
+                  </div>
+                  <div class="input-filed">
+                    <i class="icon-unlock-alt"></i>
+                    <input type="password" name="pwd" required/>
+                  </div>                  
+                  <div class="input-filed input-field-btn">
+                    <div class="ajax-login-button input-button-loader">
+                      <input type="submit" class="cs-bgcolor" value="Log in"/>
+                    </div>
+                  </div>
+                </form>                             
+              </div>
+            </div>
+          </div>                    
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Modal Popup For Login End -->
+
+{% if user.is_authenticated %}
 <!-- Modal Popup Start For Acc -->
 <div class="modal fade" id="acc_reg" aria-labelledby="myModalLabel">
   <div class="modal-dialog">
@@ -423,61 +458,11 @@
   <!-- Modal Popup For Quote End -->
 
 
-<!-- Modal Popup Start For Account -->
-<div class="modal fade" id="sign-in" aria-labelledby="myModalLabel">
-    <div class="modal-dialog">
-      <div class="login-form">
-        <div class="modal-content">
-          <div class="tab-content">
-            <div id="user-login-tab" class="tab-pane fade in active">
-              <div class="modal-header">
-                <button
-                  type="button"
-                  class="float-start close"
-                  data-dismiss="modal"
-                  aria-label="Close"
-                >
-                  <span aria-hidden="true">×</span>
-                </button>
-                <h5 class="modal-title">
-                  Login To Your Account
-                </h5>
-              </div>
-              <div class="modal-body">                
-                <div class="cs-login-pbox">                  
-                  <form                    
-                    method="post"
-                    class="wp-user-form webkit"
-                    id="ControlForm_43687">
-                    {% csrf_token %}                 
-                    <div class="input-filed">
-                      <i class="icon-user4"></i>
-                      <input type="text" name='uname' placeholder="Username" />
-                    </div>
-                    <div class="input-filed">
-                      <i class="icon-unlock-alt"></i>
-                      <input type="password" name="pwd" required/>
-                    </div>                  
-                    <div class="input-filed input-field-btn">
-                      <div class="ajax-login-button input-button-loader">
-                        <input type="submit" class="cs-bgcolor" value="Log in"/>
-                      </div>
-                    </div>
-                  </form>                             
-                </div>
-              </div>
-            </div>                    
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  <!-- Modal Popup For Login End -->
+
 
 
 <script>
   $('#account_check').on('click', function (e) {
-    console.log('---------------');
     const accs = $('#accounts').val();
     if (accs.length >= 2){
       alert('계정은 한 개만 선택 해주세요')
@@ -491,7 +476,7 @@
       data: JSON.stringify(data),
       datatype: "json",
       success: function(xhr, status){
-        window.location.reload()
+        
       },
       error:function(request,status,error){
         console.log(error.message)
@@ -526,4 +511,5 @@
     headers: { "X-CSRFToken": '{{csrf_token}}' }
   });
 </script>
+{%endif%}
 {% endblock %}
