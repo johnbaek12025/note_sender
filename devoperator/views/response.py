@@ -18,8 +18,7 @@ from django.contrib import auth
 from crawler.models import Bloger
 from devoperator.models import Message, NaverAccounts, NoteSendingLog, Quote
 from devoperator.tasks.distributor import task_distributor
-from devoperator.views.exception import *
-from naver.naver_login import NaverLogin, NoteSender
+from devoperator.tasks.exception import *
 # from naver.bloger_collect import Collector
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
@@ -161,15 +160,24 @@ class NoteDataView(MultipleFormView):
     model = NaverAccounts
     form_classes = {"AccForm": AccForm, "RecForm": RecForm, "MsgForm": MsgForm, "QutForm": QutForm}    
     
+    def log_gen(self, log_qs):
+        data = []
+        for l in log_qs:
+            data.append({                    
+                "log": f"계정:{l.account.nid}/ 발신자:{l.receiver.bid}/ 발신결과: {l.is_success if l.is_success else l.error_msg} 시간: {l.try_at}"
+                })
+        return data
     
     def get_context_data(self, **kwargs):
         if self.request.user.is_authenticated:
+            todate = datetime.now().strftime('%Y%m%d')
             context = super().get_context_data(**kwargs)
             context['acc_list'] = self.model.objects.all()
             context['bloger_list'] = Bloger.objects.all()
             context['msg_list'] = Message.objects.all()
             context['quote_list'] = Quote.objects.all()
-            context['log_list'] = NoteSendingLog.objects.all()
+            logs = NoteSendingLog.objects.select_related('account').select_related('receiver').filter(try_at_date=todate)                        
+            context['log_list'] = self.log_gen(logs)
             for f in self.form_classes:            
                 context[f] = self.form_classes[f]
         else:
@@ -182,18 +190,7 @@ class NoteDataView(MultipleFormView):
 def account_check(request):
     if request.method == 'POST':
         acc = json.loads(request.body.decode('utf-8'))['accounts']
-        task_distributor.send(**{"NaverLogin": {"account":acc}})
-        # acc = NaverAccounts.objects.get(id=acc[0])
-        # nid = acc.nid
-        # npw = acc.npw
-        # nl = NaverLogin(nid, npw)
-        # try:   
-        #     nl.login()        
-        # except LoginError:
-        #     messages.warning(request, f'{nid} 계정을 확인 해주세요~!!')
-        # else:
-        #     acc.validation = True
-        #     acc.save()
+        task_distributor.send(**{"NaverLogin": {"account":acc}})  
         return HttpResponseRedirect("/")
 
 

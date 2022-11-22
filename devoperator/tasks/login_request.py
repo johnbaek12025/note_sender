@@ -7,7 +7,9 @@ from requests.adapters import HTTPAdapter
 import rsa
 import uuid
 import lzstring
+
 from devoperator.views.exception import LoginError
+
 
 
 class NaverLogin:
@@ -106,4 +108,4 @@ class NaverLogin:
         if 'help' in finalize_url:
             raise LoginError
         res = self.status_validation(finalize_url, self.session)        
-        return self.session    
+        return self.session

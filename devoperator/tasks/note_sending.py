@@ -1,6 +1,7 @@
 
-from devoperator.tasks.login_request import NaverLogin
 from devoperator.views.exception import CheckingError, LoginError
+from devoperator.tasks.login_request import NaverLogin
+from decouple import config
 
 
 class NoteSender(NaverLogin):
@@ -20,10 +21,6 @@ class NoteSender(NaverLogin):
             "u": None
         }
         self.sender = None
-    
-    def _set_token(self):
-        tokens = self.status_validation(self.check_count_urls, self.session, post_data=self.data)
-        self.data.update({"token": tokens['token'], "svcCode": tokens['svcCode']})
 
     def check_note_count(self):
         try:
@@ -32,16 +29,31 @@ class NoteSender(NaverLogin):
             raise LoginError
         else:
             self.data['u'] = res['userId']
-            print(res)
+            # print(res)
             return res
     
+    def _set_token(self):
+        tokens = self.status_validation(self.check_count_urls, self.session, post_data=self.data)
+        self.data.update({"token": tokens['token'], "svcCode": tokens['svcCode']})
+
     def sending(self):
         if not self.check_note_count():
             raise CheckingError
         self._set_token()        
         res = self.status_validation(self.note_send_url, self.session, post_data=self.data)        
-        print(res)
-        if res['Result'] == 'FAIL':
-            print('Failed Sending')
-        else:
-            print(res['Message'])    
+        return res
+            
+            
+            
+if __name__=='__main__':
+    nid = config('nid')
+    npw = config('npw')
+    # switchIp2()    
+    nl = NaverLogin(nid, npw)
+    
+    session = nl.login()
+    
+    s = NoteSender(session=session, taker = 'rascu', msg='get it out son it is the begininig of wisdom')
+    s.sending()
+    
+    
