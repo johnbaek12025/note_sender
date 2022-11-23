@@ -23,7 +23,6 @@ def task_distributor(**kwargs):
         else:
             if len(v) > 1:
                 sending_process(**v)
-                
             else:
                 data = v['account']
                 acc = NaverAccounts.objects.get(id=data[0])

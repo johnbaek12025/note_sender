@@ -27,6 +27,6 @@ urlpatterns = [
     path('blip/', include('crawler.urls')),
     path('home', home)
 ]
-# urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 # if DEBUG:
 #     urlpatterns += [path('silk/', include('silk.urls', namespace='silk'))]

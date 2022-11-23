@@ -4,13 +4,14 @@ from devoperator.utility.utility import make_excel
 from bs4 import BeautifulSoup as bf
 import time
 import random
-
+from django.conf import settings
 
 class Collector:
     def __init__(self, keyword) -> None:
         self.url = "https://s.search.naver.com/p/blog/search.naver?where=blog&sm=tab_pge&api_type=1&query={keyword}&rev=44&start={cnt}&dup_remove=1&post_blogurl=&post_blogurl_without=&nso=&dkey=0&source_query=&nx_search_query={keyword}&spq=0&_callback=viewMoreContents"
         self.keyword = keyword
         self.columns = ['bid', 'blog_name', 'keyword']
+        self.path = settings.MEDIA_ROOT
     
     def set_session(self):
         return requests.Session()
@@ -19,6 +20,7 @@ class Collector:
     def main(self):
         s = self.set_session()
         data = {}
+        print(self.path)
         for i in range(31):
             cnt = i * 30 + 1
             print(cnt)
@@ -28,7 +30,8 @@ class Collector:
             data.update(d)
         data = self.dict_reset(data)
         print('data')
-        make_excel(self.columns, data, self.keyword)
+        file_name = f'{self.path}/{self.keyword}'
+        make_excel(self.columns, data, file_name)
         
     
     def dict_reset(self, data):
